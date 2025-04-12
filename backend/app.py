@@ -12,6 +12,7 @@ from api.auth_implementation import implement_auth_endpoints
 from api.entry import entry_bp
 from api.user import user_bp
 from api.stripe import stripe_bp
+from api.image import image_bp
 
 # Create Flask app
 app = Flask(__name__)
@@ -21,6 +22,7 @@ CORS(app)
 app.register_blueprint(entry_bp, url_prefix='/api')
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(stripe_bp, url_prefix='/api/stripe')
+app.register_blueprint(image_bp, url_prefix='/api/image')
 
 # Implement auth endpoints directly on app
 implement_auth_endpoints(app)

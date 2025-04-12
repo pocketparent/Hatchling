@@ -15,7 +15,8 @@ import {
   Select,
   MenuItem,
   Grid,
-  Autocomplete
+  Autocomplete,
+  Divider
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -26,6 +27,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import PeopleIcon from '@mui/icons-material/People';
 import PublicIcon from '@mui/icons-material/Public';
 import { format } from 'date-fns';
+import EntryImageHandler from './EntryImageHandler';
 
 // Common tags based on specifications
 const commonTags = [
@@ -112,6 +114,37 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
+  };
+
+  const handleImageUpdate = (newImageUrl) => {
+    setFormData(prev => ({
+      ...prev,
+      media_url: newImageUrl
+    }));
+    
+    // In a real implementation, this would suggest tags based on the image
+    // using the OpenAI integration
+    if (formData.tags.length === 0) {
+      fetch('/api/entry/suggest-tags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image_url: newImageUrl })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.tags && data.tags.length) {
+          setFormData(prev => ({
+            ...prev,
+            tags: data.tags
+          }));
+        }
+      })
+      .catch(error => {
+        console.error('Error suggesting tags:', error);
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -208,30 +241,18 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
               onChange={handleChange}
             />
             
-            {/* Media preview if available */}
-            {formData.media_url && (
-              <Box mt={2} textAlign="center">
-                {formData.media_url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                  <img 
-                    src={formData.media_url} 
-                    alt="Memory" 
-                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }} 
-                  />
-                ) : formData.media_url.match(/\.(mp4|mov|avi)$/i) ? (
-                  <video 
-                    controls 
-                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }}
-                  >
-                    <source src={formData.media_url} />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Media attached (not previewable)
-                  </Typography>
-                )}
-              </Box>
-            )}
+            {/* Image/Media Handler - New Component */}
+            <Box mt={2}>
+              <Typography variant="subtitle2" gutterBottom>
+                Photo/Video
+              </Typography>
+              <EntryImageHandler 
+                imageUrl={formData.media_url} 
+                onImageUpdate={handleImageUpdate} 
+              />
+            </Box>
+            
+            <Divider sx={{ my: 2 }} />
             
             {/* Tags section */}
             <Box mt={2}>
