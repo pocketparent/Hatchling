@@ -1,10 +1,12 @@
-// Common interfaces
+// src/types.ts
+
+// Common interfaces for the application
 export interface JournalEntry {
   id: string;
   title: string;
   content: string;
   date: Date;
-  images: string[] | File[];
+  images: (string | File)[];
 }
 
 // Component prop interfaces
