@@ -6,12 +6,8 @@ import {
   SelectChangeEvent
 } from '@mui/material';
 
-// Define the props interface (if needed)
-interface SettingsProps {
-  // Add any props if needed
-}
-
-const Settings: React.FC<SettingsProps> = () => {
+// Use React.FC directly without empty interface
+const Settings: React.FC = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [reminderFrequency, setReminderFrequency] = useState<string>('weekly');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
