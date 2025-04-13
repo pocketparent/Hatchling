@@ -4,17 +4,26 @@ import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { format } from 'date-fns';
 
+// Define JournalEntry interface
+interface JournalEntry {
+  id: string;
+  title: string;
+  content: string;
+  date: Date;
+  images: string[];
+}
+
 // Add this interface for the component props
 interface JournalViewProps {
-  onOpenEntryModal: (entry?: any) => void;
+  onOpenEntryModal: (entry?: JournalEntry) => void;
 }
 
 // Update the component definition to use the interface
 const JournalView: React.FC<JournalViewProps> = ({ onOpenEntryModal }) => {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
 
   useEffect(() => {
     // Fetch entries from API
@@ -22,7 +31,7 @@ const JournalView: React.FC<JournalViewProps> = ({ onOpenEntryModal }) => {
       try {
         // In a real implementation, this would fetch from your backend
         // For demo purposes, using mock data
-        const mockEntries = [
+        const mockEntries: JournalEntry[] = [
           {
             id: '1',
             title: 'First steps!',
@@ -57,7 +66,7 @@ const JournalView: React.FC<JournalViewProps> = ({ onOpenEntryModal }) => {
     fetchEntries();
   }, []);
 
-  const handleMenuOpen = (event, entry) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, entry: JournalEntry) => {
     setAnchorEl(event.currentTarget);
     setSelectedEntry(entry);
   };
@@ -68,14 +77,18 @@ const JournalView: React.FC<JournalViewProps> = ({ onOpenEntryModal }) => {
   };
 
   const handleEditEntry = () => {
-    onOpenEntryModal(selectedEntry);
-    handleMenuClose();
+    if (selectedEntry) {
+      onOpenEntryModal(selectedEntry);
+      handleMenuClose();
+    }
   };
 
   const handleDeleteEntry = () => {
     // In a real implementation, this would call your backend API
-    setEntries(entries.filter(entry => entry.id !== selectedEntry.id));
-    handleMenuClose();
+    if (selectedEntry) {
+      setEntries(entries.filter(entry => entry.id !== selectedEntry.id));
+      handleMenuClose();
+    }
   };
 
   return (
