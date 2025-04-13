@@ -6,49 +6,35 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-// Define the props interface (if needed)
-interface AccountCreationProps {
-  // Add any props if needed
-}
-
-const AccountCreation: React.FC<AccountCreationProps> = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+// No empty interface - use React.FC directly
+const AccountCreation: React.FC = () => {
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  
   const navigate = useNavigate();
-
-  const steps = ['Account Details', 'Contact Information', 'Confirmation'];
-
-  const handleNext = () => {
-    if (activeStep === 0) {
-      // Validate password match
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-    }
-    
+  const steps = ['Account Details', 'Contact Information', 'Review'];
+  
+  const handleNext = (): void => {
     setActiveStep((prevStep) => prevStep + 1);
-    setError('');
   };
-
-  const handleBack = () => {
+  
+  const handleBack = (): void => {
     setActiveStep((prevStep) => prevStep - 1);
-    setError('');
   };
-
-  const handleCreateAccount = async () => {
+  
+  const handleCreateAccount = async (): Promise<void> => {
     setLoading(true);
     setError('');
     
     try {
-      // In a real implementation, this would call your registration API
+      // In a real implementation, this would call your authentication API
       // For demo purposes, just simulate account creation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Store auth token (in a real app, this would come from your backend)
       localStorage.setItem('authToken', 'demo-token');
@@ -95,7 +81,7 @@ const AccountCreation: React.FC<AccountCreationProps> = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               error={password !== confirmPassword}
-              helperText={password !== confirmPassword ? "Passwords don't match" : ""}
+              helperText={password !== confirmPassword ? "Passwords don&apos;t match" : ""}
             />
           </>
         );
@@ -111,7 +97,7 @@ const AccountCreation: React.FC<AccountCreationProps> = () => {
               placeholder="For SMS notifications (optional)"
             />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              We'll use this number to send you SMS reminders to log memories.
+              We&apos;ll use this number to send you SMS reminders to log memories.
               This is optional but recommended for the best experience.
             </Typography>
           </>
@@ -123,7 +109,7 @@ const AccountCreation: React.FC<AccountCreationProps> = () => {
               Ready to Create Your Account
             </Typography>
             <Typography variant="body1" paragraph>
-              You're all set to start capturing precious memories with Hatchling!
+              You&apos;re all set to start capturing precious memories with Hatchling!
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Email: {email}<br />
@@ -132,7 +118,7 @@ const AccountCreation: React.FC<AccountCreationProps> = () => {
           </Box>
         );
       default:
-        return 'Unknown step';
+        return <Typography>Unknown step</Typography>;
     }
   };
 
