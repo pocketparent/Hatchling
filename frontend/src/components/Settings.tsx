@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Box, Typography, Switch, FormControlLabel, 
-  TextField, Button, Divider, Paper, Select,
-  MenuItem, FormControl, InputLabel, Alert
+  TextField, Button, Paper, Select,
+  MenuItem, FormControl, InputLabel, Alert,
+  SelectChangeEvent
 } from '@mui/material';
 
 // Define the props interface (if needed)
@@ -11,12 +12,12 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [reminderFrequency, setReminderFrequency] = useState('weekly');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
+  const [reminderFrequency, setReminderFrequency] = useState<string>('weekly');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = (): void => {
     // In a real implementation, this would save to your backend
     console.log('Saving settings:', {
       notificationsEnabled,
@@ -43,7 +44,7 @@ const Settings: React.FC<SettingsProps> = () => {
           control={
             <Switch
               checked={notificationsEnabled}
-              onChange={(e) => setNotificationsEnabled(e.target.checked)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotificationsEnabled(e.target.checked)}
               color="primary"
             />
           }
@@ -55,7 +56,7 @@ const Settings: React.FC<SettingsProps> = () => {
             <InputLabel>Reminder Frequency</InputLabel>
             <Select
               value={reminderFrequency}
-              onChange={(e) => setReminderFrequency(e.target.value)}
+              onChange={(e: SelectChangeEvent) => setReminderFrequency(e.target.value)}
               label="Reminder Frequency"
             >
               <MenuItem value="daily">Daily</MenuItem>
@@ -74,7 +75,7 @@ const Settings: React.FC<SettingsProps> = () => {
           label="Phone Number"
           fullWidth
           value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
           placeholder="For SMS notifications"
           margin="normal"
         />
