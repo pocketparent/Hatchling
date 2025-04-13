@@ -5,14 +5,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
 import { ReactNode } from 'react';
 
-// Add proper type for the children prop
-const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Box>
-    );
   }
 
 // Components
@@ -124,22 +116,23 @@ function App() {
     setCurrentEntry(null);
   };
 
-  // Protected route component
-  const ProtectedRoute = ({ children }) => {
-    if (isLoading) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <CircularProgress />
-        </Box>
-      );
-    }
-    
-    if (!isAuthenticated) {
-      return <Navigate to="/login" />;
-    }
-    
-    return children;
-  };
+// Protected route component
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
+};
+
 
   return (
     <ThemeProvider theme={theme}>
