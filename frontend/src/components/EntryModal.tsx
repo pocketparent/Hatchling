@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
+  Dialog, DialogTitle, DialogContent, 
   TextField, Button, Box, Typography, IconButton 
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -9,20 +9,29 @@ import ImageIcon from '@mui/icons-material/Image';
 import MicIcon from '@mui/icons-material/Mic';
 import EntryImageHandler from './EntryImageHandler';
 
+// Define the JournalEntry interface (or import from types.ts)
+interface JournalEntry {
+  id: string;
+  title: string;
+  content: string;
+  date: Date;
+  images: (string | File)[];
+}
+
 // Define the props interface
 interface EntryModalProps {
   open: boolean;
   onClose: () => void;
-  entry: any | null; // Replace with a more specific type if available
+  entry: JournalEntry | null;
 }
 
 const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [images, setImages] = useState([]);
-  const [isRecording, setIsRecording] = useState(false);
-  const [showImageHandler, setShowImageHandler] = useState(false);
+  const [title, setTitle] = useState<string>('');
+  const [content, setContent] = useState<string>('');
+  const [date, setDate] = useState<Date>(new Date());
+  const [images, setImages] = useState<(string | File)[]>([]);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [showImageHandler, setShowImageHandler] = useState<boolean>(false);
 
   useEffect(() => {
     if (entry) {
@@ -39,13 +48,13 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
     }
   }, [entry, open]);
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     // In a real implementation, this would save to your backend
     console.log('Saving entry:', { title, content, date, images });
     onClose();
   };
 
-  const handleStartRecording = () => {
+  const handleStartRecording = (): void => {
     // In a real implementation, this would start voice recording
     setIsRecording(true);
     // Mock recording for demo purposes
@@ -55,7 +64,7 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
     }, 2000);
   };
 
-  const handleImageUpload = (newImages) => {
+  const handleImageUpload = (newImages: File[]): void => {
     setImages([...images, ...newImages]);
     setShowImageHandler(false);
   };
@@ -81,8 +90,7 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
             <DatePicker
               label="Date"
               value={date}
-              onChange={(newDate) => setDate(newDate)}
-              renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+              onChange={(newDate: Date | null) => newDate && setDate(newDate)}
             />
           </Box>
           <TextField
@@ -91,7 +99,7 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
             label="Title"
             fullWidth
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -100,7 +108,7 @@ const EntryModal: React.FC<EntryModalProps> = ({ open, onClose, entry }) => {
             rows={6}
             fullWidth
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContent(e.target.value)}
             sx={{ mb: 2 }}
           />
           
