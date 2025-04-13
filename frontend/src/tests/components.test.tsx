@@ -6,6 +6,11 @@ import EntryModal from '../components/EntryModal';
 import Login from '../components/Login';
 import AccountCreation from '../components/AccountCreation';
 import Settings from '../components/Settings';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Button, TextField, Dialog, AppBar, Tabs } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import { format } from 'date-fns';
 
 // Mock data
 const mockEntries = [
@@ -276,5 +281,50 @@ describe('Settings Component', () => {
     fireEvent.click(inviteButton);
     
     expect(screen.getByText('Invite Co-Parent or Caregiver')).toBeInTheDocument();
+  });
+});
+// Dependency Validation Tests
+describe('Dependency Validation', () => {
+  test('validates react-router-dom dependency', () => {
+    // This test will fail if react-router-dom is not installed
+    expect(typeof BrowserRouter).toBe('function');
+  });
+
+  test('validates Material UI dependencies', () => {
+    // These tests will fail if Material UI packages are not installed
+    expect(typeof ThemeProvider).toBe('function');
+    expect(typeof createTheme).toBe('function');
+    expect(typeof Button).toBe('function');
+    expect(typeof TextField).toBe('function');
+    expect(typeof Dialog).toBe('function');
+    expect(typeof AppBar).toBe('function');
+    expect(typeof Tabs).toBe('function');
+  });
+
+  test('validates MUI Date Picker dependency', () => {
+    // This test will fail if @mui/x-date-pickers is not installed
+    expect(typeof DatePicker).toBe('function');
+  });
+
+  test('validates date-fns dependency', () => {
+    // This test will fail if date-fns is not installed
+    expect(typeof format).toBe('function');
+    
+    // Test basic functionality
+    const testDate = new Date(2025, 3, 12);
+    const formatted = format(testDate, 'yyyy-MM-dd');
+    expect(formatted).toBe('2025-04-12');
+  });
+
+  test('validates Material UI theme creation', () => {
+    // This test will fail if there are issues with the Material UI setup
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#1976d2',
+        },
+      },
+    });
+    expect(theme.palette.primary.main).toBe('#1976d2');
   });
 });
