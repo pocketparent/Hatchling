@@ -1,5 +1,4 @@
 name: Hatchling CI/CD Pipeline
-
 on:
   push:
     branches: [ main ]
@@ -7,7 +6,52 @@ on:
     branches: [ main ]
 
 jobs:
-  test-backend:
+  validate-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Cache npm dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+        
+    - name: Install dependencies
+      run: |
+        cd frontend
+        rm -rf node_modules
+        npm install --legacy-peer-deps
+    
+    - name: Run TypeScript type checking
+      run: |
+        cd frontend
+        npm run typecheck
+    
+    - name: Run linting
+      run: |
+        cd frontend
+        npm run lint
+        
+    - name: Run tests
+      run: |
+        cd frontend
+        CI=true npm test -- --passWithNoTests
+    
+    - name: Verify build
+      run: |
+        cd frontend
+        npm run build
+
+  validate-backend:
     runs-on: ubuntu-latest
     
     steps:
@@ -17,6 +61,14 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
         
     - name: Install dependencies
       run: |
@@ -27,39 +79,20 @@ jobs:
     - name: Run tests
       run: |
         cd backend
-        python -m unittest discover -s tests || echo "Tests failed but continuing for now"
-
-  test-frontend:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        
-    - name: Install dependencies
-      run: |
-        cd frontend
-        # Critical fix: Use npm install instead of npm ci
-        # This will update package-lock.json to match package.json
-        rm -rf node_modules
-        npm install --legacy-peer-deps
-        
-    - name: Run tests with fallback
-      run: |
-        cd frontend
-        CI=true npm test -- --passWithNoTests || echo "Tests failed but continuing for now"
+        python -m unittest discover -s tests
 
   deploy:
-    needs: [test-backend, test-frontend]
+    needs: [validate-frontend, validate-backend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Run pre-deployment validation
+      run: |
+        chmod +x ./pre-deploy.sh
+        ./pre-deploy.sh
     
     - name: Deploy to Render
       env:
