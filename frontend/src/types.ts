@@ -29,6 +29,18 @@ export interface EntryImageHandlerProps {
 export interface AccountCreationProps {
   // Add any props if needed
 }
+// Add to src/types.ts
+
+export interface ImageEditorProps {
+  imageUrl: string;
+  onSave: (result: ImageEditResult | null) => void;
+}
+
+export interface ImageEditResult {
+  filter: string;
+  quality: number;
+  imageUrl: string;
+}
 
 export interface SettingsProps {
   // Add any props if needed
