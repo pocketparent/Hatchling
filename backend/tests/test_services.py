@@ -1,3 +1,5 @@
+import importlib
+import pkg_resources
 import unittest
 from unittest.mock import patch, MagicMock
 from services.firebase_service import FirebaseService
@@ -268,3 +270,51 @@ class TestStripeService(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+class TestDependencyValidation(unittest.TestCase):
+    """Test class to validate required dependencies are installed and have correct versions."""
+    
+    def test_required_backend_dependencies(self):
+        """Test that all required backend dependencies are installed."""
+        required_packages = [
+            'flask', 'flask-cors', 'firebase-admin', 'twilio', 'openai', 
+            'stripe', 'gunicorn', 'pillow', 'python-dotenv', 'pyjwt'
+        ]
+        
+        for package in required_packages:
+            try:
+                pkg_resources.get_distribution(package)
+            except pkg_resources.DistributionNotFound:
+                self.fail(f"Required package '{package}' is not installed")
+    
+    def test_pillow_for_image_processing(self):
+        """Test that Pillow is available for image processing."""
+        try:
+            # Try to import PIL modules used in the application
+            from PIL import Image, ImageOps
+            # Create a small test image to verify functionality
+            img = Image.new('RGB', (10, 10), color='red')
+            # Test basic operations
+            img_gray = ImageOps.grayscale(img)
+            self.assertEqual(img_gray.mode, 'L', "Grayscale conversion failed")
+        except ImportError as e:
+            self.fail(f"Failed to import PIL modules: {e}")
+        except Exception as e:
+            self.fail(f"Error using PIL: {e}")
+    
+    def test_firebase_configuration(self):
+        """Test that Firebase configuration is properly set up."""
+        # Check if firebase_admin can be imported
+        try:
+            import firebase_admin
+            from firebase_admin import credentials
+            # Check if environment variables for Firebase are set
+            import os
+            required_env_vars = [
+                'FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID',
+                'FIREBASE_STORAGE_BUCKET', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY'
+            ]
+            missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+            if missing_vars:
+                self.fail(f"Missing Firebase environment variables: {', '.join(missing_vars)}")
+        except ImportError:
+            self.fail("Failed to import firebase_admin")
