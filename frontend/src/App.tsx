@@ -115,7 +115,7 @@ function App() {
   };
 
   // Protected route component
-  const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const ProtectedRoute = ({ children }: { children: ReactNode }): JSX.Element => {
     if (isLoading) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -128,7 +128,7 @@ function App() {
       return <Navigate to="/login" />;
     }
     
-    return children;
+    return <>{children}</>;
   };
 
   return (
