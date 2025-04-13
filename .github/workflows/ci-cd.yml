@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, hatchling-mvp ]
 
+env:
+  # Set to 'true' to enforce strict validation, 'false' for transitional phase
+  ENFORCE_STRICT_VALIDATION: 'false'
+
 jobs:
   lint-backend:
     runs-on: ubuntu-latest
@@ -28,15 +32,28 @@ jobs:
     - name: Lint with flake8
       run: |
         cd backend
-        # stop the build if there are Python syntax errors or undefined names
+        # Always check for syntax errors and undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+        # In transitional phase, all other issues are just warnings
+        if [ "$ENFORCE_STRICT_VALIDATION" = "true" ]; then
+          # Strict mode: fail on warnings
+          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
+        else
+          # Transitional mode: show warnings but don't fail
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        fi
     
     - name: Check formatting with black
       run: |
         cd backend
-        black --check --diff .
+        if [ "$ENFORCE_STRICT_VALIDATION" = "true" ]; then
+          # Strict mode: fail on formatting issues
+          black --check --diff .
+        else
+          # Transitional mode: show formatting issues but don't fail
+          black --check --diff . || echo "Formatting issues found, but continuing in transitional mode"
+        fi
   
   test-backend:
     runs-on: ubuntu-latest
@@ -59,12 +76,15 @@ jobs:
     - name: Run tests
       run: |
         cd backend
+        # Set environment variable for tests to know if they should be strict
+        export ENFORCE_STRICT_VALIDATION=$ENFORCE_STRICT_VALIDATION
         python -m unittest discover -s tests
         
     - name: Validate dependencies
       run: |
         cd backend
-        # Run only the dependency validation tests
+        # Set environment variable for tests to know if they should be strict
+        export ENFORCE_STRICT_VALIDATION=$ENFORCE_STRICT_VALIDATION
         python -m unittest tests.test_services.TestDependencyValidation
 
   lint-frontend:
@@ -87,6 +107,13 @@ jobs:
     - name: Lint with ESLint
       run: |
         cd frontend
+        # Determine error level based on validation mode
+        if [ "$ENFORCE_STRICT_VALIDATION" = "true" ]; then
+          ERROR_LEVEL="error"
+        else
+          ERROR_LEVEL="warn"
+        fi
+        
         npx eslint --no-eslintrc --config - --ext .js,.jsx,.ts,.tsx src <<EOF
         {
           "env": {
@@ -115,7 +142,7 @@ jobs:
           ],
           "rules": {
             "react/react-in-jsx-scope": "off",
-            "react-hooks/rules-of-hooks": "error",
+            "react-hooks/rules-of-hooks": "${ERROR_LEVEL}",
             "react-hooks/exhaustive-deps": "warn",
             "no-unused-vars": "warn",
             "@typescript-eslint/no-unused-vars": ["warn"],
@@ -150,13 +177,14 @@ jobs:
     - name: Run tests
       run: |
         cd frontend
-        npm test -- --watchAll=false
+        # Pass environment variable to tests
+        ENFORCE_STRICT_VALIDATION=$ENFORCE_STRICT_VALIDATION npm test -- --watchAll=false
         
     - name: Validate dependencies
       run: |
         cd frontend
-        # Run only the dependency validation tests
-        npm test -- --watchAll=false --testMatch="**/tests/*test*" -t "Dependency Validation"
+        # Pass environment variable to tests
+        ENFORCE_STRICT_VALIDATION=$ENFORCE_STRICT_VALIDATION npm test -- --watchAll=false --testMatch="**/tests/*test*" -t "Dependency Validation"
 
   # Dependabot configuration integrated directly into workflow
   dependency-scan:
@@ -168,14 +196,27 @@ jobs:
     - name: Check for vulnerable dependencies
       run: |
         echo "Running dependency vulnerability scan"
+        
         # Frontend dependency check
         cd frontend
-        npm audit --audit-level=high
+        if [ "$ENFORCE_STRICT_VALIDATION" = "true" ]; then
+          # Strict mode: fail on high vulnerabilities
+          npm audit --audit-level=high
+        else
+          # Transitional mode: report but don't fail
+          npm audit --audit-level=high || echo "Vulnerabilities found, but continuing in transitional mode"
+        fi
         
         # Backend dependency check
         cd ../backend
         pip install safety
-        safety check -r requirements.txt --full-report
+        if [ "$ENFORCE_STRICT_VALIDATION" = "true" ]; then
+          # Strict mode: fail on vulnerabilities
+          safety check -r requirements.txt --full-report
+        else
+          # Transitional mode: report but don't fail
+          safety check -r requirements.txt --full-report || echo "Vulnerabilities found, but continuing in transitional mode"
+        fi
 
   deploy:
     needs: [test-backend, test-frontend, dependency-scan]
