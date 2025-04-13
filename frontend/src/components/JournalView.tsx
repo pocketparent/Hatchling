@@ -1,229 +1,145 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, Chip, IconButton, TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import { Box, Typography, Grid, Card, CardContent, CardActionArea, Fab, IconButton, Menu, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { format } from 'date-fns';
 
-// Mock data for development
-const mockEntries = [
-  {
-    entry_id: '1',
-    content: 'First steps today! She was so excited and proud of herself.',
-    tags: ['Milestone', 'First Steps'],
-    date_of_memory: '2025-04-10',
-    timestamp_created: '2025-04-10T15:30:00Z',
-    privacy: 'private',
-    media_url: null
-  },
-  {
-    entry_id: '2',
-    content: 'Laughed for the first time at the dog. It was the most beautiful sound!',
-    tags: ['Milestone', 'First Laugh'],
-    date_of_memory: '2025-04-08',
-    timestamp_created: '2025-04-08T12:15:00Z',
-    privacy: 'shared',
-    media_url: 'https://example.com/photo1.jpg'
-  },
-  {
-    entry_id: '3',
-    content: 'Tried sweet potatoes for the first time. The face she made was priceless!',
-    tags: ['Food', 'First Foods'],
-    date_of_memory: '2025-04-05',
-    timestamp_created: '2025-04-05T18:45:00Z',
-    privacy: 'private',
-    media_url: 'https://example.com/photo2.jpg'
-  }
-];
+// Add this interface for the component props
+interface JournalViewProps {
+  onOpenEntryModal: (entry?: any) => void;
+}
 
-const JournalView = () => {
+// Update the component definition to use the interface
+const JournalView: React.FC<JournalViewProps> = ({ onOpenEntryModal }) => {
   const [entries, setEntries] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   useEffect(() => {
-    // In a real implementation, this would fetch from the API
-    // const fetchEntries = async () => {
-    //   try {
-    //     const response = await api.get('/entries');
-    //     setEntries(response.data.entries);
-    //   } catch (error) {
-    //     console.error('Error fetching entries:', error);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
+    // Fetch entries from API
+    const fetchEntries = async () => {
+      try {
+        // In a real implementation, this would fetch from your backend
+        // For demo purposes, using mock data
+        const mockEntries = [
+          {
+            id: '1',
+            title: 'First steps!',
+            content: 'Baby took their first steps today!',
+            date: new Date(2023, 3, 15),
+            images: [],
+          },
+          {
+            id: '2',
+            title: 'New word',
+            content: 'Baby said "mama" for the first time!',
+            date: new Date(2023, 3, 10),
+            images: [],
+          },
+          {
+            id: '3',
+            title: 'Park visit',
+            content: 'We went to the park and baby loved the swings.',
+            date: new Date(2023, 3, 5),
+            images: [],
+          },
+        ];
+        
+        setEntries(mockEntries);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching entries:', error);
+        setLoading(false);
+      }
+    };
     
-    // Simulate API call with mock data
-    setTimeout(() => {
-      setEntries(mockEntries);
-      setIsLoading(false);
-    }, 1000);
-    
-    // fetchEntries();
+    fetchEntries();
   }, []);
 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleMenuOpen = (event, entry) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedEntry(entry);
   };
 
-  const handleTagClick = (tag) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedEntry(null);
   };
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
+  const handleEditEntry = () => {
+    onOpenEntryModal(selectedEntry);
+    handleMenuClose();
   };
 
-  const openEntryModal = (entry = null) => {
-    // This would open the entry modal for viewing/editing an entry
-    // or creating a new one if entry is null
-    console.log('Open entry modal', entry);
+  const handleDeleteEntry = () => {
+    // In a real implementation, this would call your backend API
+    setEntries(entries.filter(entry => entry.id !== selectedEntry.id));
+    handleMenuClose();
   };
-
-  // Filter entries based on search term and selected tags
-  const filteredEntries = entries.filter(entry => {
-    const matchesSearch = searchTerm === '' || 
-      entry.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => entry.tags.includes(tag));
-    
-    return matchesSearch && matchesTags;
-  });
-
-  // Extract all unique tags from entries
-  const allTags = [...new Set(entries.flatMap(entry => entry.tags))];
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy');
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  if (isLoading) {
-    return <Box p={3}><Typography>Loading journal entries...</Typography></Box>;
-  }
 
   return (
-    <Box sx={{ maxWidth: '100%', overflowX: 'hidden' }}>
-      {/* Header with search and filters */}
-      <Box sx={{ position: 'sticky', top: 0, bgcolor: 'background.paper', zIndex: 1, p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" component="h1">
-            Journal
-          </Typography>
-          <IconButton 
-            color="primary" 
-            aria-label="add entry"
-            onClick={() => openEntryModal()}
-            sx={{ 
-              bgcolor: 'primary.main', 
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            <AddIcon />
-          </IconButton>
-        </Box>
-        
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search memories..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={toggleFilters}>
-                  <FilterListIcon color={selectedTags.length > 0 ? "primary" : "inherit"} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
-          sx={{ mb: 2 }}
-        />
-        
-        {/* Filter tags */}
-        {showFilters && (
-          <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {allTags.map(tag => (
-              <Chip
-                key={tag}
-                label={tag}
-                onClick={() => handleTagClick(tag)}
-                color={selectedTags.includes(tag) ? "primary" : "default"}
-                variant={selectedTags.includes(tag) ? "filled" : "outlined"}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
+    <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Hatchling Journal
+      </Typography>
       
-      {/* Entries list */}
-      <Box sx={{ p: 2 }}>
-        {filteredEntries.length === 0 ? (
-          <Typography align="center" sx={{ mt: 4, color: 'text.secondary' }}>
-            No entries found. Start capturing memories!
-          </Typography>
-        ) : (
-          <Grid container spacing={2}>
-            {filteredEntries.map(entry => (
-              <Grid item xs={12} key={entry.entry_id}>
-                <Card 
-                  sx={{ 
-                    cursor: 'pointer',
-                    '&:hover': {
-                      boxShadow: 3
-                    }
-                  }}
-                  onClick={() => openEntryModal(entry)}
-                >
+      {loading ? (
+        <Typography>Loading entries...</Typography>
+      ) : (
+        <Grid container spacing={3}>
+          {entries.map((entry) => (
+            <Grid item xs={12} sm={6} md={4} key={entry.id}>
+              <Card>
+                <CardActionArea onClick={() => onOpenEntryModal(entry)}>
                   <CardContent>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {formatDate(entry.date_of_memory)}
-                    </Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                      {entry.content}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {entry.tags.map(tag => (
-                        <Chip
-                          key={`${entry.entry_id}-${tag}`}
-                          label={tag}
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTagClick(tag);
-                          }}
-                        />
-                      ))}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Typography variant="h6" component="h2">
+                        {entry.title}
+                      </Typography>
+                      <IconButton 
+                        size="small" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMenuOpen(e, entry);
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {format(new Date(entry.date), 'MMMM d, yyyy')}
+                    </Typography>
+                    <Typography variant="body1">
+                      {entry.content.length > 100 
+                        ? `${entry.content.substring(0, 100)}...` 
+                        : entry.content}
+                    </Typography>
                   </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+      
+      <Fab 
+        color="primary" 
+        aria-label="add" 
+        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        onClick={() => onOpenEntryModal()}
+      >
+        <AddIcon />
+      </Fab>
+      
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEditEntry}>Edit</MenuItem>
+        <MenuItem onClick={handleDeleteEntry}>Delete</MenuItem>
+      </Menu>
     </Box>
   );
 };
