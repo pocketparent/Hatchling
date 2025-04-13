@@ -5,19 +5,15 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-// Define the props interface (if needed)
-interface LoginProps {
-  // Add any props if needed
-}
-
-const Login: React.FC<LoginProps> = () => {
+// Use React.FC directly without empty interface
+const Login: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   
   const navigate = useNavigate();
-
+  
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
@@ -117,7 +113,7 @@ const Login: React.FC<LoginProps> = () => {
             }}
             underline="hover"
           >
-            Don't have an account? Sign up
+            Don&apos;t have an account? Sign up
           </Link>
         </Box>
       </Paper>
