@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { Box, Button, Slider, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Button, Slider, Typography, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 
-const ImageEditor = ({ imageUrl, onSave }) => {
-  const [filter, setFilter] = useState('none');
-  const [quality, setQuality] = useState(85);
-  const [preview, setPreview] = useState(imageUrl);
+// Define interfaces for props and other types
+interface ImageEditorProps {
+  imageUrl: string;
+  onSave: (result: ImageEditResult | null) => void;
+}
+
+interface ImageEditResult {
+  filter: string;
+  quality: number;
+  imageUrl: string;
+}
+
+const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, onSave }) => {
+  const [filter, setFilter] = useState<string>('none');
+  const [quality, setQuality] = useState<number>(85);
+  const [preview, setPreview] = useState<string>(imageUrl);
 
   // This would be replaced with actual API calls in production
-  const applyFilter = (filterType) => {
+  const applyFilter = (filterType: string): void => {
     // In a real implementation, this would call the backend API
     // For demo purposes, we're just updating the state
     setFilter(filterType);
     setPreview(`${imageUrl}?filter=${filterType}`);
   };
 
-  const handleFilterChange = (event) => {
+  const handleFilterChange = (event: SelectChangeEvent): void => {
     const newFilter = event.target.value;
     applyFilter(newFilter);
   };
 
-  const handleQualityChange = (event, newValue) => {
-    setQuality(newValue);
+  const handleQualityChange = (_event: Event, newValue: number | number[]): void => {
+    setQuality(newValue as number);
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     // In a real implementation, this would send the settings to the backend
     onSave({
       filter,
