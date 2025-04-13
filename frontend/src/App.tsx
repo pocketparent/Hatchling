@@ -5,7 +5,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
 import { ReactNode } from 'react';
 
-
 // Components
 import JournalView from './components/JournalView';
 import EntryModal from './components/EntryModal';
