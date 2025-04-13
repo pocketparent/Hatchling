@@ -62,7 +62,7 @@ const AccountCreation: React.FC<AccountCreationProps> = () => {
     }
   };
 
-  const getStepContent = (step) => {
+  const getStepContent = (step: number): JSX.Element => {
     switch (step) {
       case 0:
         return (
