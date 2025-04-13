@@ -3,6 +3,17 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
+import { ReactNode } from 'react';
+
+// Add proper type for the children prop
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
 // Components
 import JournalView from './components/JournalView';
