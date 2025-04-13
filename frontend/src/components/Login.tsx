@@ -11,13 +11,14 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -81,7 +82,7 @@ const Login: React.FC<LoginProps> = () => {
             fullWidth
             margin="normal"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             required
             autoFocus
           />
@@ -91,7 +92,7 @@ const Login: React.FC<LoginProps> = () => {
             fullWidth
             margin="normal"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             required
           />
           <Button
@@ -110,7 +111,7 @@ const Login: React.FC<LoginProps> = () => {
         <Box sx={{ textAlign: 'center', mt: 2 }}>
           <Link 
             href="#" 
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
               e.preventDefault();
               navigate('/create-account');
             }}
