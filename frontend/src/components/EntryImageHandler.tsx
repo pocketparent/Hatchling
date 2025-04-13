@@ -1,150 +1,141 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, IconButton } from '@mui/material';
-import { Edit as EditIcon, FilterAlt as FilterIcon } from '@mui/icons-material';
-import ImageEditor from './ImageEditor';
+import { 
+  Dialog, DialogTitle, DialogContent, DialogActions, 
+  Button, Box, Typography, IconButton, Grid
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
-// This component will be integrated into EntryModal.tsx
-const EntryImageHandler = ({ imageUrl, onImageUpdate }) => {
-  const [editorOpen, setEditorOpen] = useState(false);
-  
-  const handleOpenEditor = () => {
-    setEditorOpen(true);
-  };
-  
-  const handleCloseEditor = () => {
-    setEditorOpen(false);
-  };
-  
-  const handleSaveImage = (imageSettings) => {
-    if (!imageSettings) {
-      // User canceled
-      handleCloseEditor();
-      return;
+// Define the props interface
+interface EntryImageHandlerProps {
+  open: boolean;
+  onClose: () => void;
+  onUpload: (images: File[]) => void;
+}
+
+const EntryImageHandler: React.FC<EntryImageHandlerProps> = ({ open, onClose, onUpload }) => {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const handleFileSelect = (event) => {
+    if (event.target.files) {
+      const filesArray = Array.from(event.target.files) as File[];
+      setSelectedFiles([...selectedFiles, ...filesArray]);
+      
+      // Create previews
+      const newPreviews = filesArray.map(file => URL.createObjectURL(file));
+      setPreviews([...previews, ...newPreviews]);
     }
-    
-    // In a real implementation, this would call the backend API
-    // to process the image with the selected settings
-    fetch('/api/image/process', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        image_url: imageSettings.imageUrl,
-        operations: [
-          {
-            type: 'filter',
-            filter_type: imageSettings.filter === 'none' ? 'enhance' : imageSettings.filter
-          },
-          {
-            type: 'compress',
-            quality: imageSettings.quality
-          }
-        ]
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      // Update the parent component with the processed image URL
-      if (data.results && data.results.filtered_url) {
-        onImageUpdate(data.results.filtered_url);
-      }
-      handleCloseEditor();
-    })
-    .catch(error => {
-      console.error('Error processing image:', error);
-      handleCloseEditor();
-    });
   };
-  
+
+  const handleRemoveImage = (index) => {
+    const newFiles = [...selectedFiles];
+    newFiles.splice(index, 1);
+    setSelectedFiles(newFiles);
+    
+    const newPreviews = [...previews];
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    setPreviews(newPreviews);
+  };
+
+  const handleUpload = () => {
+    onUpload(selectedFiles);
+    // Clear selected files after upload
+    setSelectedFiles([]);
+    // Revoke object URLs to avoid memory leaks
+    previews.forEach(preview => URL.revokeObjectURL(preview));
+    setPreviews([]);
+  };
+
   return (
-    <Box sx={{ position: 'relative' }}>
-      {imageUrl && (
-        <>
-          <Box 
-            component="img" 
-            src={imageUrl} 
-            alt="Memory" 
-            sx={{ 
-              width: '100%', 
-              borderRadius: 2,
-              maxHeight: '300px',
-              objectFit: 'contain'
-            }} 
-          />
-          
-          <Box sx={{ 
-            position: 'absolute', 
-            top: 8, 
-            right: 8, 
-            display: 'flex', 
-            gap: 1,
-            backgroundColor: 'rgba(255,255,255,0.7)',
-            borderRadius: 1,
-            padding: '2px'
-          }}>
-            <IconButton 
-              size="small" 
-              onClick={handleOpenEditor}
-              aria-label="Edit image"
-              sx={{ backgroundColor: 'white' }}
-            >
-              <FilterIcon fontSize="small" />
-            </IconButton>
-            
-            <IconButton 
-              size="small" 
-              onClick={handleOpenEditor}
-              aria-label="Apply filters"
-              sx={{ backgroundColor: 'white' }}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
+    <Dialog 
+      open={open} 
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+    >
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          Add Images
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ mb: 3 }}>
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<CloudUploadIcon />}
+            fullWidth
+            sx={{ py: 5 }}
+          >
+            Select Images
+            <input
+              type="file"
+              hidden
+              multiple
+              accept="image/*"
+              onChange={handleFileSelect}
+            />
+          </Button>
+        </Box>
+        
+        {previews.length > 0 && (
+          <Box>
+            <Typography variant="subtitle1" gutterBottom>
+              Selected Images ({previews.length})
+            </Typography>
+            <Grid container spacing={2}>
+              {previews.map((preview, index) => (
+                <Grid item xs={6} sm={4} md={3} key={index}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box
+                      component="img"
+                      src={preview}
+                      sx={{
+                        width: '100%',
+                        height: 150,
+                        objectFit: 'cover',
+                        borderRadius: 1
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 5,
+                        right: 5,
+                        bgcolor: 'rgba(255,255,255,0.7)',
+                        '&:hover': {
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                        }
+                      }}
+                      onClick={() => handleRemoveImage(index)}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
-        </>
-      )}
-      
-      {!imageUrl && (
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
         <Button 
-          variant="outlined" 
-          component="label" 
-          fullWidth
-          sx={{ height: '120px', borderStyle: 'dashed' }}
+          onClick={handleUpload} 
+          variant="contained" 
+          color="primary"
+          disabled={selectedFiles.length === 0}
         >
-          Upload Image
-          <input
-            type="file"
-            hidden
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                // In a real implementation, this would upload the file
-                // and then set the returned URL
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  if (event.target) {
-                    onImageUpdate(event.target.result);
-                  }
-                };
-                reader.readAsDataURL(e.target.files[0]);
-              }
-            }}
-          />
+          Add to Entry
         </Button>
-      )}
-      
-      <Dialog 
-        open={editorOpen} 
-        onClose={handleCloseEditor}
-        maxWidth="sm"
-        fullWidth
-      >
-        <ImageEditor 
-          imageUrl={imageUrl} 
-          onSave={handleSaveImage} 
-        />
-      </Dialog>
-    </Box>
+      </DialogActions>
+    </Dialog>
   );
 };
 
