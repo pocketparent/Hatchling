@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   Button, Box, Typography, IconButton, Grid
@@ -17,7 +17,15 @@ const EntryImageHandler: React.FC<EntryImageHandlerProps> = ({ open, onClose, on
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
-  const handleFileSelect = (event) => {
+  // Add cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Revoke all object URLs when component unmounts
+      previews.forEach(preview => URL.revokeObjectURL(preview));
+    };
+  }, [previews]);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files) as File[];
       setSelectedFiles([...selectedFiles, ...filesArray]);
@@ -28,7 +36,7 @@ const EntryImageHandler: React.FC<EntryImageHandlerProps> = ({ open, onClose, on
     }
   };
 
-  const handleRemoveImage = (index) => {
+  const handleRemoveImage = (index: number): void => {
     const newFiles = [...selectedFiles];
     newFiles.splice(index, 1);
     setSelectedFiles(newFiles);
@@ -39,7 +47,7 @@ const EntryImageHandler: React.FC<EntryImageHandlerProps> = ({ open, onClose, on
     setPreviews(newPreviews);
   };
 
-  const handleUpload = () => {
+  const handleUpload = (): void => {
     onUpload(selectedFiles);
     // Clear selected files after upload
     setSelectedFiles([]);
