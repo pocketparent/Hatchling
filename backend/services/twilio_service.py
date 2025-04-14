@@ -85,6 +85,24 @@ class TwilioService:
             print(f"Error sending magic link: {e}")
             return None
     
+    # Added both method names to maintain backward compatibility
+    def send_confirmation(self, to_number, entry):
+        """
+        Send confirmation message after entry creation.
+        
+        Args:
+            to_number: Recipient phone number
+            entry: Journal entry object
+            
+        Returns:
+            Message SID if successful, None otherwise
+        """
+        # Determine if entry has media
+        has_media = bool(entry.get('images', []))
+        has_text = bool(entry.get('content', '').strip())
+        
+        return self.send_entry_confirmation(to_number, has_media, has_text)
+    
     def send_entry_confirmation(self, to_number, has_media=False, has_text=True):
         """
         Send confirmation message after receiving an entry.
