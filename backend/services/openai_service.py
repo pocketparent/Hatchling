@@ -1,6 +1,8 @@
 import os
-import openai
 from dotenv import load_dotenv
+
+# Import the new OpenAI client
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -21,11 +23,15 @@ class OpenAIService:
         """Initialize OpenAI client with API key from environment variables."""
         try:
             # Get OpenAI API key from environment variables
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+            api_key = os.getenv("OPENAI_API_KEY")
+            
+            # Initialize the client with the API key
+            self.client = OpenAI(api_key=api_key)
             
             print("OpenAI service initialized successfully")
         except Exception as e:
             print(f"Error initializing OpenAI service: {e}")
+            self.client = None
             # In production, would use proper logging
     
     def transcribe_audio(self, audio_file_path):
@@ -38,11 +44,18 @@ class OpenAIService:
         Returns:
             Transcription text if successful, None otherwise
         """
+        if not self.client:
+            return None
+            
         try:
             with open(audio_file_path, "rb") as audio_file:
-                transcript = openai.Audio.transcribe("whisper-1", audio_file)
+                # Updated API call for OpenAI v1.0+
+                transcript = self.client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file
+                )
             
-            return transcript.get("text")
+            return transcript.text
         except Exception as e:
             print(f"Error transcribing audio: {e}")
             return None
@@ -57,6 +70,9 @@ class OpenAIService:
         Returns:
             List of suggested tags if successful, empty list otherwise
         """
+        if not self.client:
+            return []
+            
         try:
             # Define common tag categories based on specifications
             common_tags = ["Milestone", "Funny", "Sweet Moment", "Food", "Sleep", "Health", "Family", "Friends", "Outing"]
@@ -70,9 +86,9 @@ class OpenAIService:
             Memory: {content}
             """
             
-            # Call OpenAI API for tag suggestions
-            response = openai.Completion.create(
-                engine="text-davinci-003",
+            # Updated API call for OpenAI v1.0+
+            response = self.client.completions.create(
+                model="gpt-3.5-turbo-instruct",  # Replacement for text-davinci-003
                 prompt=prompt,
                 max_tokens=50,
                 temperature=0.3
