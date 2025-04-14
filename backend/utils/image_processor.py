@@ -1,22 +1,82 @@
 import os
-from PIL import Image, ImageOps
-from io import BytesIO
 import requests
+from io import BytesIO
+import logging
+
+# Add proper error handling for PIL import
+try:
+    from PIL import Image, ImageOps
+except ImportError:
+    logging.warning("Failed to import PIL modules. Please install with: pip install pillow")
+    # Create placeholder classes to prevent crashes
+    class Image:
+        @staticmethod
+        def open(*args, **kwargs):
+            raise ImportError("PIL is not installed. Please install with: pip install pillow")
+    
+    class ImageOps:
+        @staticmethod
+        def grayscale(*args, **kwargs):
+            raise ImportError("PIL is not installed. Please install with: pip install pillow")
+        
+        @staticmethod
+        def autocontrast(*args, **kwargs):
+            raise ImportError("PIL is not installed. Please install with: pip install pillow")
 
 class ImageProcessor:
     """
-    Utility class for processing images in the Hatchling app.
-    Handles thumbnail generation, compression, and metadata extraction.
+    Utility class for image processing operations including resizing, compression, and filters.
     """
     
-    def __init__(self, storage_path="/tmp/hatchling_images"):
-        """Initialize with storage path for processed images"""
-        self.storage_path = storage_path
-        os.makedirs(storage_path, exist_ok=True)
-    
-    def generate_thumbnail(self, image_path, size=(200, 200), output_path=None):
+    def __init__(self, storage_path=None):
         """
-        Generate a thumbnail from an image file or URL
+        Initialize the image processor with a storage path.
+        
+        Args:
+            storage_path: Directory to store processed images (optional)
+        """
+        self.storage_path = storage_path or os.path.join(os.getcwd(), 'processed_images')
+        
+        # Create storage directory if it doesn't exist
+        if not os.path.exists(self.storage_path):
+            os.makedirs(self.storage_path)
+    
+    def resize_image(self, image_path, size=(800, 800), output_path=None):
+        """
+        Resize an image while maintaining aspect ratio.
+        
+        Args:
+            image_path: Local file path or URL of the image
+            size: Tuple of (width, height) for the resized image
+            output_path: Path to save the resized image (optional)
+            
+        Returns:
+            Path to the resized image
+        """
+        # Determine if image_path is a URL or local file
+        if image_path.startswith(('http://', 'https://') ):
+            response = requests.get(image_path)
+            img = Image.open(BytesIO(response.content))
+        else:
+            img = Image.open(image_path)
+        
+        # Resize image while maintaining aspect ratio
+        img.thumbnail(size)
+        
+        # Determine output path if not provided
+        if not output_path:
+            filename = os.path.basename(image_path)
+            name, ext = os.path.splitext(filename)
+            output_path = os.path.join(self.storage_path, f"{name}_resized{ext}")
+        
+        # Save resized image
+        img.save(output_path, optimize=True)
+        
+        return output_path
+    
+    def create_thumbnail(self, image_path, size=(200, 200), output_path=None):
+        """
+        Create a thumbnail of an image.
         
         Args:
             image_path: Local file path or URL of the image
@@ -24,10 +84,10 @@ class ImageProcessor:
             output_path: Path to save the thumbnail (optional)
             
         Returns:
-            Path to the generated thumbnail
+            Path to the thumbnail
         """
         # Determine if image_path is a URL or local file
-        if image_path.startswith(('http://', 'https://')):
+        if image_path.startswith(('http://', 'https://') ):
             response = requests.get(image_path)
             img = Image.open(BytesIO(response.content))
         else:
@@ -60,7 +120,7 @@ class ImageProcessor:
             Path to the compressed image
         """
         # Determine if image_path is a URL or local file
-        if image_path.startswith(('http://', 'https://')):
+        if image_path.startswith(('http://', 'https://') ):
             response = requests.get(image_path)
             img = Image.open(BytesIO(response.content))
         else:
@@ -92,7 +152,7 @@ class ImageProcessor:
             Dictionary of EXIF data
         """
         # Determine if image_path is a URL or local file
-        if image_path.startswith(('http://', 'https://')):
+        if image_path.startswith(('http://', 'https://') ):
             response = requests.get(image_path)
             img = Image.open(BytesIO(response.content))
         else:
@@ -114,7 +174,7 @@ class ImageProcessor:
                 34853: 'GPSInfo'
             }
             
-            for tag_id, tag_name in exif_tags.items():
+            for tag_id, tag_name in exif_tags.items() :
                 if tag_id in exif:
                     exif_data[tag_name] = exif[tag_id]
         
@@ -133,7 +193,7 @@ class ImageProcessor:
             Path to the filtered image
         """
         # Determine if image_path is a URL or local file
-        if image_path.startswith(('http://', 'https://')):
+        if image_path.startswith(('http://', 'https://') ):
             response = requests.get(image_path)
             img = Image.open(BytesIO(response.content))
         else:
