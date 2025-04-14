@@ -78,7 +78,7 @@ class StripeService:
                 price_id = self.monthly_price_id
                 
             # Set default URLs if not provided
-            base_url = os.getenv("BASE_URL", "https://myhatchling.ai")
+            base_url = os.getenv("BASE_URL", "https://myhatchling.ai") 
             if not success_url:
                 success_url = f"{base_url}/subscription/success"
             if not cancel_url:
@@ -132,6 +132,36 @@ class StripeService:
         except Exception as e:
             print(f"Error handling webhook: {e}")
             return None, None
+    
+    def handle_subscription_event(self, event_data):
+        """
+        Handle subscription-related webhook events.
+        
+        Args:
+            event_data: Stripe event data object
+            
+        Returns:
+            Dictionary with subscription details if successful, empty dict otherwise
+        """
+        try:
+            subscription_id = event_data.get("id")
+            customer_id = event_data.get("customer")
+            status = event_data.get("status")
+            current_period_end = event_data.get("current_period_end")
+            
+            # Process subscription data
+            subscription_details = {
+                "subscription_id": subscription_id,
+                "customer_id": customer_id,
+                "status": status,
+                "current_period_end": current_period_end,
+                "is_active": status in ["active", "trialing"]
+            }
+            
+            return subscription_details
+        except Exception as e:
+            print(f"Error handling subscription event: {e}")
+            return {}
     
     def get_subscription_status(self, subscription_id):
         """
