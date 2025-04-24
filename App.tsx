@@ -1,20 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// App.tsx
+import React, { useCallback, useEffect, useState } from 'react';
+import { SafeAreaProvider }                       from 'react-native-safe-area-context';
+import * as SplashScreen                         from 'expo-splash-screen';
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+} from '@expo-google-fonts/poppins';
+
+import RootNavigator from './src/navigation';
 
 export default function App() {
+  const [ready, setReady] = useState(false);
+
+  // Keep the splash visible until we hide it
+  useEffect(() => {
+    SplashScreen.preventAutoHideAsync();
+  }, []);
+
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().then(() => setReady(true));
+    }
+  }, [fontsLoaded]);
+
+  if (!ready) return null;
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <RootNavigator />
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -1,0 +1,646 @@
+[
+    {
+      "source": "https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/default.aspx",
+      "age_range": "0-1 week",
+      "category": "total_sleep_duration",
+      "recommendation": "Newborns typically sleep about 16–17 hours per day, usually in stretches of only 1–2 hours at a time."
+    },
+    {
+      "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+      "age_range": "0-1 week",
+      "category": "wake_window",
+      "recommendation": "At 0–1 week old, a baby’s wake windows are very short – only about 30 minutes to 1 hour between sleep periods."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/2-week-old-sleep-schedule-bedtime-and-nap-schedule",
+      "age_range": "0-1 week",
+      "category": "bedtime",
+      "recommendation": "Day-night confusion is common in the first weeks. Keep nights dark and quiet and days bright and active to help your newborn sort out day and night by around 8 weeks old."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/2-week-old-sleep-schedule-bedtime-and-nap-schedule",
+      "age_range": "2-3 weeks",
+      "category": "total_sleep_duration",
+      "recommendation": "Around 2 weeks old, babies average ~15.5 hours of sleep per 24 hours, though some may sleep more or less. The AAP notes newborns generally sleep ~16–17 hours daily."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/2-week-old-sleep-schedule-bedtime-and-nap-schedule",
+      "age_range": "2-3 weeks",
+      "category": "wake_window",
+      "recommendation": "Wake windows for a 2-week-old are about 30–90 minutes at most. Newborns get tired quickly and need frequent naps throughout the day."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/2-week-old-sleep-schedule-bedtime-and-nap-schedule",
+      "age_range": "2-3 weeks",
+      "category": "bedtime",
+      "recommendation": "Don’t expect an early 'bedtime' yet – your newborn’s longest sleep stretch often starts late (after 10 PM) since their sleep is very irregular now. A more predictable earlier bedtime will emerge by around 3–4 months old."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/2-week-old-sleep-schedule-bedtime-and-nap-schedule",
+      "age_range": "2-3 weeks",
+      "category": "regression",
+      "recommendation": "No true 'sleep regressions' occur at 2–3 weeks. Frequent night wakings now are normal for feeding and adjusting to life outside the womb. Major regressions tend to happen around 4, 8–10, 12, and 18 months as developmental leaps occur."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/1-month-old-sleep-schedule-and-development",
+      "age_range": "4-5 weeks",
+      "category": "total_sleep_duration",
+      "recommendation": "At ~1 month old, babies need around 15.5 hours of sleep per day on average. There is a wide normal range, so monitor your infant’s mood and cues in addition to counting hours."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/1-month-old-sleep-schedule-and-development",
+      "age_range": "4-5 weeks",
+      "category": "wake_window",
+      "recommendation": "Most 4–5 week old infants can only stay comfortably awake for about 30–90 minutes at a time before needing to sleep again."
+    },
+    {
+      "source": "https://huckleberrycare.com/blog/1-month-old-sleep-schedule-and-development",
+      "age_range": "4-5 weeks",
+      "category": "bedtime",
+      "recommendation": "At 1 month old, bedtimes tend to be on the later side. Your baby’s longest sleep might not begin until 10 PM or even later, due to an irregular newborn schedule. By 3–4 months, you will start to see an earlier bedtime develop."
+    }
+  ,
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "6-7 weeks",
+    "category": "short_nap_signs",
+    "recommendation": "Short naps (30–45 min) are very common for newborns. Many 6–7 week old babies take lots of catnaps unless held, which is normal at this stage​. Consistent longer naps will start to develop in the coming months"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/2-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "8-9 weeks",
+    "category": "total_sleep_duration",
+    "recommendation": "By 2 months old, babies still need approximately 14–17 hours of sleep per day (including naps)​. Sleep remains variable, but you may start to see a bit more daytime alertness and longer night sleep stretches"
+    },
+    {
+    "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+    "age_range": "8-9 weeks",
+    "category": "wake_window",
+    "recommendation": "Around 2 months of age, wake windows lengthen to roughly 1–2 hours​. Your baby might be able to have a brief feeding and playtime before needing the next nap"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/1-month-old-sleep-schedule-and-development",
+    "age_range": "8-9 weeks",
+    "category": "bedtime",
+    "recommendation": "Day/night confusion should be resolving by ~8 weeks​. You can expect your 2-month-old’s longest sleep to gradually start earlier in the evening once their internal clock matures"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/nap-transitions-when-they-occur-and-how-to-handle-them",
+    "age_range": "8-9 weeks",
+    "category": "nap_duration",
+    "recommendation": "In the newborn phase, babies may take 4–6+ naps per day of varying lengths​.There isn’t a firm nap “schedule” yet at 2 months old due to irregular sleep patterns"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "10-11 weeks",
+    "category": "short_nap_signs",
+    "recommendation": "If your 10–11 week old wakes up after a single 30–45 minute sleep cycle, it’s usually normal for this age​
+
+    . Understanding that short naps are expected in young infants can help you determine when they’re an issue versus a normal phase​
+   
+    "
+    },
+    {
+    "source": "https://www.sleepfoundation.org/children-and-sleep/how-much-sleep-do-kids-need",
+    "age_range": "12-13 weeks",
+    "category": "total_sleep_duration",
+    "recommendation": "By 3 months old, babies tend to sleep around 14–15 hours per day (though anywhere from 11 up to 19 hours can be normal)​
+   
+    . Sleep starts to become a bit more predictable around this age"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/first-year-of-sleep-expectations",
+    "age_range": "12-13 weeks",
+    "category": "wake_window",
+    "recommendation": "Around 3 months of age, wake windows lengthen to about 1–2 hours​
+    
+    . Many 3-month-olds can handle 60–120 minutes of awake time before needing the next nap​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-sleep-regression",
+    "age_range": "12-13 weeks",
+    "category": "regression",
+    "recommendation": "Not all babies hit a regression at 3 months, but be aware that the major “4-month sleep regression” may be approaching. If sleep worsens in the next few weeks (more night wakings, short naps, fussiness), it could be the 4-month sleep changes starting​"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/first-year-of-sleep-expectations",
+    "age_range": "14-15 weeks",
+    "category": "wake_window",
+    "recommendation": "By about 3.5 months, many babies have wake windows around 1.25–2.5 hours​. You may notice your baby can stay awake a bit longer, especially later in the day"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "14-15 weeks",
+    "category": "nap_duration",
+    "recommendation": "Around this age, some naps may start to lengthen. Morning naps for a 3–4 month old are often 45–90 minutes​. It’s still common to have one or more shorter catnaps later in the day​"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-olds-and-sleep",
+    "age_range": "16 weeks",
+    "category": "total_sleep_duration",
+    "recommendation": "At 4 months old (around 16 weeks), babies need roughly 14.5 hours of total sleep per day on average​. Typically ~11–12 hours at night and 3–4 hours across daytime naps is expected​"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-olds-and-sleep",
+    "age_range": "16 weeks",
+    "category": "wake_window",
+    "recommendation": "Wake windows for a 4-month-old are about 1.5–2.5 hours between sleeps​. Babies this age often have their last nap about 2 hours before bedtime."
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-olds-and-sleep",
+    "age_range": "16 weeks",
+    "category": "bedtime",
+    "recommendation": "Many 4-month-olds are ready for bed between roughly 6:00 PM and 8:00 PM​. The exact bedtime will depend on your baby’s wake time and naps that day, but a consistent bedtime routine in this window helps optimize sleep​"
+
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-sleep-regression",
+    "age_range": "16 weeks",
+    "category": "regression",
+    "recommendation": "Around 3–4 months, many infants go through the “4-month sleep regression.” Signs include sudden frequent night wakings, increased fussiness at bedtime, and shorter naps​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . This regression is driven by a permanent maturation of sleep cycles at this age"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-sleep-regression",
+    "age_range": "16 weeks",
+    "category": "short_nap_signs",
+    "recommendation": "During the 4-month sleep regression, it’s common for naps to become shorter (30–45 minutes) as babies fully awaken between sleep cycles and struggle to resettle​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Giving baby a chance to fall asleep independently can help them connect sleep cycles"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/first-year-of-sleep-expectations",
+    "age_range": "4 months",
+    "category": "wake_window",
+    "recommendation": "At 4 months, most babies have wake windows of about 1.5 to 2.5 hours​
+    huckleberrycare.com
+    . Watching for sleepy cues and following these awake-time ranges can help with smoother naps and bedtimes"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-olds-and-sleep",
+    "age_range": "4 months",
+    "category": "nap_duration",
+    "recommendation": "A 4-month-old typically naps 3–4 times a day. Total daytime sleep is about 3.5–4.5 hours, usually split into a couple of longer naps (up to 1.5 hours) and possibly a shorter late-afternoon nap of 30–45 minutes​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/nap-transitions-when-they-occur-and-how-to-handle-them",
+    "age_range": "4 months",
+    "category": "nap_transition",
+    "recommendation": "Around 3–4 months old, babies are usually taking 4–5 naps per day​
+    huckleberrycare.com
+    . The first major nap drop (from 4 naps to 3 naps) typically happens a bit later, by about 5–6 months​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/4-month-olds-and-sleep",
+    "age_range": "4 months",
+    "category": "sleep_tip",
+    "recommendation": "If you are still swaddling at 4 months, it’s time to start the transition out of the swaddle for safety. Most babies this age are beginning to roll, so they should sleep unswaddled (with arms free) and can use their hands to self-soothe​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "5 months",
+    "category": "total_sleep_duration",
+    "recommendation": "At 5 months old, babies need roughly 14 hours of total sleep per day​
+    huckleberrycare.com
+    . This often includes about 11–12 hours overnight and 2.5–3.5 hours of naps spread over the day​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "5 months",
+    "category": "wake_window",
+    "recommendation": "By 5 months, wake windows are expanding. Most 5-month-olds stay awake ~2 to 3 hours between naps​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . The last wake window of the day is often the longest before bedtime"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "5 months",
+    "category": "nap_duration",
+    "recommendation": "You can usually count on at least one solid nap (about 60+ minutes) by 5 months​
+    huckleberrycare.com
+    . Many babies this age take 3 naps: two longer naps in the morning/early afternoon (often ~1 hour each) and a brief third nap later in the day​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "5 months",
+    "category": "short_nap_signs",
+    "recommendation": "If a 5-month-old is still taking consistently short naps, it may help to adjust their schedule. Overtiredness or under-tiredness can both lead to 30–45 minute naps​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Try tweaking wake windows by 10–15 minutes to see if naps lengthen"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/nap-transitions-when-they-occur-and-how-to-handle-them",
+    "age_range": "5-6 months",
+    "category": "nap_transition",
+    "recommendation": "Most babies drop from 4 naps to 3 naps by around 5–6 months old​
+    huckleberrycare.com
+    . Signs your baby is ready for 3 naps include consistently resisting that late-day fourth nap and longer wake windows without getting overtired"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "total_sleep_duration",
+    "recommendation": "A 6-month-old typically sleeps about 14 hours total each day​
+    huckleberrycare.com
+    . Usually ~11 hours overnight and ~3 hours of daytime sleep (split across naps) is expected at this age​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "wake_window",
+    "recommendation": "At 6 months, wake windows are around 2–3 hours long​
+    huckleberrycare.com
+    . Typically a baby this age can be awake ~2 hours in the morning, and up to ~2.5–3 hours before bedtime as the longest stretch​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "nap_duration",
+    "recommendation": "Most 6-month-olds take 3 naps per day​
+    huckleberrycare.com
+    . The first two naps are usually at least an hour each​
+    huckleberrycare.com
+    , and a shorter third nap (~30 minutes) in the late afternoon is common​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "bedtime",
+    "recommendation": "Many 6-month-olds have a predictable bedtime about 12–13 hours after the morning wake-up​
+    huckleberrycare.com
+    . In practice, bedtime often falls between 7:00 PM and 8:00 PM for a 6-month-old baby​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "short_nap_signs",
+    "recommendation": "If your 6-month-old still takes very short naps, consider their sleep associations. By this age, babies are capable of falling asleep independently​
+    huckleberrycare.com
+    . Rocking or feeding to sleep can lead to waking after one sleep cycle; teaching self-soothing at bedtime can improve nap lengths​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "regression",
+    "recommendation": "There isn’t a defined “6-month sleep regression,” but sleep problems can still arise now. At this age, issues like frequent night wakings or nap fighting are often due to sleep-onset associations or needing a schedule adjustment​
+    huckleberrycare.com
+    . If your 6-month-old suddenly resists sleep, it may be time to slightly lengthen wake windows or encourage falling asleep without help"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "6 months",
+    "category": "sleep_tip",
+    "recommendation": "For a 6-month-old on a 3-nap schedule, the third nap can be tricky. If the late-afternoon nap is hard to achieve, try stretching the wake time before it by ~15 minutes​
+    huckleberrycare.com
+    . It’s okay if bedtime shifts slightly later on days when the last nap is late​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+    "age_range": "7 months",
+    "category": "wake_window",
+    "recommendation": "By 7 months old, wake windows generally range roughly 2.5 to 3.5 hours​
+    huckleberrycare.com
+    ​
+    health.clevelandclinic.org
+    . Babies often can stay awake longer in the afternoon/evening than in the morning at this age"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/6-month-old-sleep-schedule-and-development",
+    "age_range": "7 months",
+    "category": "nap_transition",
+    "recommendation": "Around 7 months, some babies start resisting the third nap. It’s normal at this age to occasionally have a 2-nap day when the last nap is refused​
+    huckleberrycare.com
+    . On those days, moving bedtime earlier can help avoid overtiredness​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/8-month-old-sleep-regression",
+    "age_range": "8 months",
+    "category": "total_sleep_duration",
+    "recommendation": "8-month-old babies typically sleep about 13–15 hours in a day (including naps). Many at this age sleep ~11 hours at night and 2–3 hours during the day over 2–3 naps​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+    "age_range": "8 months",
+    "category": "wake_window",
+    "recommendation": "By 8 months, babies often have wake windows of ~2.5–4 hours​
+    huckleberrycare.com
+    ​
+    health.clevelandclinic.org
+    . As they transition to 2 naps, expect about 3 hours of awake time between naps, and up to ~4–5 hours before bedtime"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/first-year-of-sleep-expectations",
+    "age_range": "8 months",
+    "category": "nap_duration",
+    "recommendation": "An 8-month-old usually takes 2 or 3 naps. Once the 3→2 nap transition is done, they’ll have two longer naps (~60–90+ minutes each)​
+    huckleberrycare.com
+    . During the transition period (7–8 months), some days might still include a short third nap​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/how-to-handle-the-eight-month-sleep-regression-like-an-expert",
+    "age_range": "8 months",
+    "category": "regression",
+    "recommendation": "Many babies go through an “8-month sleep regression” (often encompassing 7–10 months). Common signs are fighting sleep at nap time and increased night wakings​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Causes include separation anxiety, new mobility (crawling/standing), and nap transitions"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/nap-transitions-when-they-occur-and-how-to-handle-them",
+    "age_range": "8-9 months",
+    "category": "nap_transition",
+    "recommendation": "By about 8–9 months old, most infants drop from 3 naps to 2 naps per day​
+    huckleberrycare.com
+    . If your baby is around this age and consistently skipping the late-afternoon nap, it’s a sign they are ready for a 2-nap schedule"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/8-month-old-sleep-regression",
+    "age_range": "9 months",
+    "category": "bedtime",
+    "recommendation": "When a baby is 8–9 months old and on 2 naps, aim for a bedtime that ensures they don’t exceed ~5 hours of awake time before sleep​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . If naps were short or a nap was skipped, consider an earlier bedtime to compensate"
+    },
+    {
+    "source": "https://www.sleepfoundation.org/children-and-sleep/how-much-sleep-do-kids-need",
+    "age_range": "9 months",
+    "category": "total_sleep_duration",
+    "recommendation": "Infants 4–11 months old need about 12–15 hours of sleep per 24 hours, per expert guidelines​
+    sleepfoundation.org
+    . At 9 months, most babies fall in this range, often getting around 14 hours total (with 2 naps)"
+    },
+    {
+    "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+    "age_range": "10 months",
+    "category": "wake_window",
+    "recommendation": "A 10-month-old’s wake windows can be up to about 3–4.5 hours​
+    health.clevelandclinic.org
+    . Many at this age have ~3 hours awake in the morning, ~3–4 hours in the afternoon, and ~4 hours in the evening before bed"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/how-to-handle-the-eight-month-sleep-regression-like-an-expert",
+    "age_range": "10 months",
+    "category": "regression",
+    "recommendation": "Sleep disruptions around 9–10 months are usually considered part of the 8-month regression phase​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Not every baby will have a noticeable regression now, but if yours does, know that it typically lasts 2–6 weeks while they adjust to longer wake times and new skills​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/11-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "11 months",
+    "category": "nap_duration",
+    "recommendation": "At 11 months, most babies are still on 2 naps per day (morning and afternoon) totaling 2–3 hours of day sleep. Each nap is often around 60–90 minutes long​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . It’s a bit early to drop to one nap, so maintaining two solid naps is ideal"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-old-sleep-schedule-and-development",
+    "age_range": "11 months",
+    "category": "short_nap_signs",
+    "recommendation": "If an 11-month-old is suddenly taking very short naps or resisting one of their naps, it might be a sign they need slightly longer awake periods. Try lengthening their wake windows by 15–30 minutes to see if nap quality improves​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-old-sleep-schedule-and-development",
+    "age_range": "12 months",
+    "category": "total_sleep_duration",
+    "recommendation": "A typical 12-month-old needs about 13 to 14 hours of sleep in a day​
+    huckleberrycare.com
+    . This often breaks down to roughly 11–12 hours overnight and 2–3 hours across two daytime naps​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-old-sleep-schedule-and-development",
+    "age_range": "12 months",
+    "category": "wake_window",
+    "recommendation": "Wake windows for a 12-month-old are about 3.25 to 4 hours long​
+    huckleberrycare.com
+    . At this age, many babies can handle around 3.5 hours between their morning and afternoon nap, and about 4 hours before bedtime​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-old-sleep-schedule-and-development",
+    "age_range": "12 months",
+    "category": "nap_transition",
+    "recommendation": "Avoid dropping to one nap too early. Even if your 12-month-old is fighting naps, it’s usually best to stick with 2 naps a bit longer​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Most children aren’t ready for a 1-nap schedule until 14–18 months; transitioning at 1 year can cause overtiredness​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-sleep-regression",
+    "age_range": "12 months",
+    "category": "regression",
+    "recommendation": "There’s often a sleep disruption around 12 months (sometimes called the “1-year sleep regression”). Babies who were sleeping well may suddenly start resisting naps or waking at night​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Common causes are big developmental changes (learning to stand/walk) or trying to drop a nap too soon​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/12-month-old-sleep-schedule-and-development",
+    "age_range": "12 months",
+    "category": "sleep_tip",
+    "recommendation": "After your baby’s first birthday, you can introduce safe comfort items at sleep time. Check with your pediatrician, but many 12-month-olds can have a small pillow or lovey in the crib, which may help them self-soothe at bedtime​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/13-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "13 months",
+    "category": "nap_transition",
+    "recommendation": "Some toddlers begin the 2-to-1 nap transition as early as 13 months, but most are not quite ready. If your 13-month-old occasionally skips their second nap, try to offer an earlier bedtime on those 1-nap days to prevent overtiredness​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://health.clevelandclinic.org/wake-windows-by-age",
+    "age_range": "14 months",
+    "category": "wake_window",
+    "recommendation": "At 14 months (for those still on 2 naps), wake windows of about 3–4 hours are typical. If on 1 nap, the awake time stretches to ~5–5.5 hours before and after the midday nap​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/nap-transitions-when-they-occur-and-how-to-handle-them",
+    "age_range": "14-18 months",
+    "category": "nap_transition",
+    "recommendation": "Between 14–18 months is when most toddlers transition from two naps to one nap per day​
+    huckleberrycare.com
+    . Look for signs like skipping the afternoon nap or taking much longer to fall asleep for naps as cues that your child is ready to drop to one nap"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "15 months",
+    "category": "regression",
+    "recommendation": "At 15 months, some toddlers experience disrupted sleep as they adjust to dropping a nap. Short naps or extra night wakings can happen during this nap transition phase​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Once fully on one nap, their sleep typically consolidates and improves"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/5-reasons-your-babys-naps-are-too-short",
+    "age_range": "15 months",
+    "category": "short_nap_signs",
+    "recommendation": "Temporary short naps are common when a toddler is in between nap schedules. During the 15-month transition to one nap, you might see naps shorten. After the transition (usually by 18 months), a single nap can lengthen to 2 hours or more​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://www.sleepfoundation.org/children-and-sleep/how-much-sleep-do-kids-need",
+    "age_range": "16 months",
+    "category": "total_sleep_duration",
+    "recommendation": "Toddlers aged 1–2 years are recommended to get about 11–14 hours of total sleep per day (including naps)​
+    sleepfoundation.org
+    . At 16 months, many toddlers sleep roughly 11 hours at night and ~2–3 hours during the day if on one nap"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/17-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "16 months",
+    "category": "wake_window",
+    "recommendation": "If a toddler is transitioning to one nap around 16 months, expect about 5–5.5 hours of awake time on either side of that single nap​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . On two-nap days, wake windows might be shorter (around 3–4 hours) with two shorter naps"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/17-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "16 months",
+    "category": "bedtime",
+    "recommendation": "For a 16-month-old, bedtime may need to adjust based on nap changes. If they are on one midday nap, an earlier bedtime (between 6:00–8:00 PM) can help ensure they get enough sleep​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Always aim for at least 11 hours of night sleep at this age"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "total_sleep_duration",
+    "recommendation": "At 18 months, aim for about 13–14 hours of total sleep per day​
+    huckleberrycare.com
+    . This often means around 11 hours overnight and 2–3 hours of naps (usually one nap now)​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "wake_window",
+    "recommendation": "By 18 months, toddlers commonly stay awake ~5 to 5.5 hours between sleep periods​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . With one-nap schedules, expect roughly a 5-hour wake window before nap and ~5–6 hours before bedtime"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "bedtime",
+    "recommendation": "Keep a consistent bedtime between about 6:00 and 8:00 PM for an 18-month-old​
+    huckleberrycare.com
+    . Toddlers this age do best with about 5–5.75 hours of awake time before bed, so adjust bedtime earlier if needed to prevent overtiredness​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "regression",
+    "recommendation": "The “18-month sleep regression” is a common phase where a previously good sleeper starts having sleep issues. Signs include fighting naps, bedtime tantrums, new separation anxiety at night, and increased night wakings or early mornings​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . This regression is often linked to toddlers’ growing independence and teething"
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "short_nap_signs",
+    "recommendation": "If an 18-month-old’s single nap is very short (<1 hour), they may still be adjusting to having just one nap. Ensure they have a dark, quiet sleep environment and enough active play in the morning. It can take time for the nap to lengthen, but most toddlers will settle into a 1.5–2 hour nap with consistency​
+    huckleberrycare.com
+    "
+    },
+    {
+    "source": "https://huckleberrycare.com/blog/18-month-old-sleep-schedule-bedtime-and-nap-schedule",
+    "age_range": "18 months",
+    "category": "sleep_tip",
+    "recommendation": "During the 18-month regression, consistency is key. Stick to your normal bedtime routine and limits even if your toddler protests​
+    huckleberrycare.com
+    ​
+    huckleberrycare.com
+    . Providing extra comfort (like a favorite stuffed animal) and keeping a regular schedule will help them through this temporary phase"
+    }
+    ]

@@ -1,6 +1,15 @@
+// tsconfig.json
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "moduleResolution": "node",      // allow folder/index resolution
+    "jsx": "react",
+    "baseUrl": ".",                  // so relative imports still work
+  },
+  "include": [
+    "App.tsx",
+    "src/**/*",
+    "__tests__/**/*"
+  ]
 }
