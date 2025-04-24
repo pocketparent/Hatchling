@@ -35,7 +35,8 @@ export default function TourScreen({ navigation }: Props) {
   };
 
   const handleGetStarted = () => {
-    (navigation.getParent() as any)?.navigate('Main');
+    // Exit onboarding and load the Main tabs
+    navigation.getParent()?.navigate('Main');
   };
 
   return (

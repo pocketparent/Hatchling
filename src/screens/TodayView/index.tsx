@@ -68,7 +68,7 @@ export default function TodayView() {
         activities={activities}
         refreshing={refreshing}
         onRefresh={() => {}}
-        onAddActivity={() => {}}
+        onItemPress={() => {}}
       />
     );
   } else if (view === 'Schedule') {
