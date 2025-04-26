@@ -1,4 +1,3 @@
-// src/screens/Onboarding/PrefsScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -6,17 +5,16 @@ import {
   Switch,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { Button }          from '../../components/common/Button';
-import { spacing }         from '../../theme/spacing';
-import { typography }      from '../../theme/typography';
-import { colors }          from '../../theme/colors';
+import { Button } from '../../components/common/Button';
+import { spacing } from '../../theme/spacing';
+import { typography } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 import { OnboardingParamList } from '../../navigation/OnboardingNavigator';
 
 type Props = NativeStackScreenProps<OnboardingParamList, 'Prefs'>;
@@ -47,10 +45,12 @@ export default function PrefsScreen({ navigation }: Props) {
     <ScreenContainer>
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: undefined })}
-        style={styles.inner}
+        style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.content}>
-
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.sectionTitle}>Track Activities</Text>
           {[
             { label: 'Sleep', val: trackSleep, set: setTrackSleep },
@@ -110,7 +110,6 @@ export default function PrefsScreen({ navigation }: Props) {
               />
             </View>
           ))}
-
         </ScrollView>
 
         <View style={styles.buttonContainer}>
@@ -122,8 +121,10 @@ export default function PrefsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  inner: { flex: 1, padding: spacing.lg },
-  content: { paddingBottom: spacing.lg },
+  content: {
+    padding: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
   sectionTitle: {
     fontFamily: typography.fonts.serifBold,
     fontSize: typography.sizes.lg,
@@ -170,6 +171,6 @@ const styles = StyleSheet.create({
     fontFamily: typography.fonts.medium,
   },
   buttonContainer: {
-    marginTop: spacing.lg,
+    padding: spacing.lg,
   },
 });

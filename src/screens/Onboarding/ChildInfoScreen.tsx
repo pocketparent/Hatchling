@@ -1,4 +1,3 @@
-// src/screens/Onboarding/ChildInfoScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -9,14 +8,15 @@ import {
   Platform,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { Button }          from '../../components/common/Button';
-import { spacing }         from '../../theme/spacing';
-import { typography }      from '../../theme/typography';
-import { colors }          from '../../theme/colors';
+import { Button } from '../../components/common/Button';
+import { spacing } from '../../theme/spacing';
+import { typography } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 import { OnboardingParamList } from '../../navigation/OnboardingNavigator';
 
 type Props = NativeStackScreenProps<OnboardingParamList, 'ChildInfo'>;
@@ -48,92 +48,94 @@ export default function ChildInfoScreen({ navigation }: Props) {
     <ScreenContainer>
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: undefined })}
-        style={styles.inner}
+        style={{ flex: 1 }}
       >
-        <Text style={styles.title}>Your Baby’s Info</Text>
-
-        {/* Name */}
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          value={babyName}
-          onChangeText={setBabyName}
-          placeholder="e.g. Mari"
-          style={styles.input}
-        />
-
-        {/* Sex */}
-        <Text style={styles.label}>Sex</Text>
-        <View style={styles.sexContainer}>
-          {['boy', 'girl', 'none'].map((option) => (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.sexOption,
-                sex === option && styles.sexOptionSelected,
-              ]}
-              onPress={() => setSex(option as any)}
-            >
-              <Text
-                style={[
-                  styles.sexText,
-                  sex === option && styles.sexTextSelected,
-                ]}
-              >
-                {option === 'none'
-                  ? 'Prefer not to say'
-                  : option.charAt(0).toUpperCase() + option.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Date of Birth */}
-        <Text style={styles.label}>Date of Birth</Text>
-        <TouchableOpacity
-          onPress={() => setShowPicker(true)}
-          style={styles.input}
+        <ScrollView
+          contentContainerStyle={styles.inner}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.dobText}>
-            {dob.toLocaleDateString(undefined, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </Text>
-        </TouchableOpacity>
+          <Text style={styles.title}>Your Baby’s Info</Text>
 
-        {/* Modal Picker */}
-        <DateTimePickerModal
-          isVisible={showPicker}
-          mode="date"
-          display="spinner"
-          date={dob}
-          maximumDate={new Date()}
-          onConfirm={(date) => {
-            setDob(date);
-            setShowPicker(false);
-          }}
-          onCancel={() => setShowPicker(false)}
-          // give the wheel a light grey background (not pure white)
-          pickerContainerStyleIOS={{ 
-            backgroundColor: colors.background, 
-            borderTopLeftRadius: 16, 
-            borderTopRightRadius: 16, 
-          }}
-  // force the wheel text into your dark primary color
-  textColor={colors.textPrimary}
-  />
-          
-
-        {/* Next Button */}
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Next"
-            onPress={handleNext}
-            loading={loading}
-            disabled={loading}
+          {/* Name */}
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            value={babyName}
+            onChangeText={setBabyName}
+            placeholder="e.g. Mari"
+            style={styles.input}
           />
-        </View>
+
+          {/* Sex */}
+          <Text style={styles.label}>Sex</Text>
+          <View style={styles.sexContainer}>
+            {['boy', 'girl', 'none'].map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.sexOption,
+                  sex === option && styles.sexOptionSelected,
+                ]}
+                onPress={() => setSex(option as any)}
+              >
+                <Text
+                  style={[
+                    styles.sexText,
+                    sex === option && styles.sexTextSelected,
+                  ]}
+                >
+                  {option === 'none'
+                    ? 'N/A'
+                    : option.charAt(0).toUpperCase() + option.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Date of Birth */}
+          <Text style={styles.label}>Date of Birth</Text>
+          <TouchableOpacity
+            onPress={() => setShowPicker(true)}
+            style={styles.input}
+          >
+            <Text style={styles.dobText}>
+              {dob.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Modal Picker */}
+          <DateTimePickerModal
+            isVisible={showPicker}
+            mode="date"
+            display="spinner"
+            date={dob}
+            maximumDate={new Date()}
+            onConfirm={(date) => {
+              setDob(date);
+              setShowPicker(false);
+            }}
+            onCancel={() => setShowPicker(false)}
+            pickerContainerStyleIOS={{
+              backgroundColor: colors.background,
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            }}
+            textColor={colors.textPrimary}
+          />
+
+          {/* Next Button */}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Next"
+              onPress={handleNext}
+              loading={loading}
+              disabled={loading}
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ScreenContainer>
   );
@@ -141,7 +143,7 @@ export default function ChildInfoScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   inner: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.lg,
     justifyContent: 'center',
   },

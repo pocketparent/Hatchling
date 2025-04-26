@@ -1,4 +1,3 @@
-// src/screens/Onboarding/ProfileSetupScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -8,13 +7,14 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { Button }          from '../../components/common/Button';
-import { spacing }         from '../../theme/spacing';
-import { typography }      from '../../theme/typography';
-import { colors }          from '../../theme/colors';
+import { Button } from '../../components/common/Button';
+import { spacing } from '../../theme/spacing';
+import { typography } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 import { OnboardingParamList } from '../../navigation/OnboardingNavigator';
 
 type Props = NativeStackScreenProps<OnboardingParamList, 'ProfileSetup'>;
@@ -38,7 +38,6 @@ export default function ProfileSetupScreen({ navigation }: Props) {
     }
 
     setLoading(true);
-    // Here you could save to context/store or Firebase Auth stub
     setTimeout(() => {
       setLoading(false);
       navigation.push('ChildInfo');
@@ -49,35 +48,40 @@ export default function ProfileSetupScreen({ navigation }: Props) {
     <ScreenContainer>
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: undefined })}
-        style={styles.inner}
+        style={{ flex: 1 }}
       >
-        <Text style={styles.title}>Your Profile</Text>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="e.g. Diana Mezzanotte"
-          style={styles.input}
-        />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="you@example.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-        />
-
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Next"
-            onPress={handleNext}
-            loading={loading}
-            disabled={loading}
+        <ScrollView
+          contentContainerStyle={styles.inner}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.title}>Your Profile</Text>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Diana Mezzanotte"
+            style={styles.input}
           />
-        </View>
+
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
+          />
+
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Next"
+              onPress={handleNext}
+              loading={loading}
+              disabled={loading}
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ScreenContainer>
   );
@@ -85,7 +89,7 @@ export default function ProfileSetupScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   inner: {
-    flex: 1,
+    flexGrow: 1,
     padding: spacing.lg,
     justifyContent: 'center',
   },

@@ -1,115 +1,374 @@
-import React from 'react';
+// File: src/screens/TodayView/TimelineView.tsx
+
+import React, { useState, useCallback } from 'react'
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
   RefreshControl,
   TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme/spacing';
-import { Activity, ActivityType, mockActivities } from './types';
+  Text,
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from '@react-navigation/native'
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  where,
+  orderBy,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
+import { db, auth } from '../../config/firebase'
 
-const iconMap: Record<ActivityType, keyof typeof Ionicons.glyphMap> = {
-  sleep: 'moon',
-  feeding: 'restaurant',
-  diaper: 'water',
-  milestone: 'trophy',
-  health: 'medkit',
-};
+import { Activity, ActivityType, activityColorMap } from './types'
+import { NLInputBar } from '../../components/common/NLInputBar'
+import { Fab } from '../../components/common/Fab'
+import { SleepModal } from '../../components/modals/SleepModal'
+import { FeedingModal } from '../../components/modals/FeedingModal'
+import { DiaperModal } from '../../components/modals/DiaperModal'
+import { MilestoneModal } from '../../components/modals/MilestoneModal'
+import { ActivityItem } from '../../components/ActivityItem'
+import { colors } from '../../theme/colors'
+import { spacing } from '../../theme/spacing'
 
-export interface Props {
-  activities?: Activity[];
-  refreshing: boolean;
-  onRefresh: () => void;
-  onItemPress: (type: ActivityType, activity?: Activity) => void;
+const ACTIONS: {
+  type: ActivityType
+  icon: keyof typeof Ionicons.glyphMap
+  color: string
+}[] = [
+  { type: 'sleep',     icon: 'moon',       color: colors.sleep     },
+  { type: 'feeding',   icon: 'restaurant', color: colors.feeding   },
+  { type: 'diaper',    icon: 'water',      color: colors.diaper    },
+  { type: 'milestone', icon: 'camera',     color: colors.accentPrimary },
+]
+
+function formatHM(min: number) {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
 }
 
-export default function TimelineView({
-  activities = mockActivities,
-  refreshing,
-  onRefresh,
-  onItemPress,
-}: Props) {
-  const renderItem = ({ item }: { item: Activity }) => {
-    const borderStyle = styles[
-      `item_${item.type}` as keyof typeof styles
-    ] as ViewStyle;
+function computeStats(activities: Activity[]) {
+  const now = new Date()
+  let totalDayMin = 0
 
-    return (
-      <TouchableOpacity onPress={() => onItemPress(item.type, item)}>
-        <View style={[styles.itemContainer, borderStyle]}>
-          <Ionicons
-            name={iconMap[item.type]}
-            size={24}
-            color={colors.textSecondary}
-            style={styles.icon}
-          />
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.time}>{item.time}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  activities.forEach(a => {
+    if (a.type === 'sleep' && a.period === 'day') {
+      const dur = parseInt(a.duration || '') || 0
+      totalDayMin += dur
+    }
+  })
+
+  const lastSleepDates = activities
+    .filter(a => a.type === 'sleep')
+    .map(a => new Date(a.createdAt))
+
+  const lastSleep = lastSleepDates.length
+    ? new Date(Math.max(...lastSleepDates.map(d => d.getTime())))
+    : null
+
+  const timeSinceLastSleep = lastSleep
+    ? formatHM(Math.round((now.getTime() - lastSleep.getTime()) / 60000))
+    : '–'
+
+  let totalBottle = 0
+  let totalBreastMin = 0
+  activities.forEach(a => {
+    if (a.type === 'feeding') {
+      const fa = a as any
+      if (fa.mode === 'bottle') totalBottle += fa.amount || 0
+      else if (fa.mode === 'breast')
+        totalBreastMin += parseInt(fa.duration || '') || 0
+    }
+  })
+
+  const wet = activities.filter(
+    a => a.type === 'diaper' && (a as any).status === 'Wet'
+  ).length
+  const dirty = activities.filter(
+    a => a.type === 'diaper' && (a as any).status === 'Dirty'
+  ).length
+
+  return {
+    totalDaySleep: formatHM(totalDayMin),
+    timeSinceLastSleep,
+    totalBottle,
+    totalBreastMin,
+    wet,
+    dirty,
+  }
+}
+
+function SummaryView({ activities }: { activities: Activity[] }) {
+  const stats = computeStats(activities)
+  const cards = [
+    {
+      key: 'sleep' as const,
+      icon: 'moon' as const,
+      value: stats.totalDaySleep,
+      label: 'Day Sleep',
+      secondary: `Since ${stats.timeSinceLastSleep}`,
+      color: activityColorMap.sleep,
+    },
+    {
+      key: 'feeding' as const,
+      icon: 'restaurant' as const,
+      value: `${stats.totalBottle}oz, ${stats.totalBreastMin}m`,
+      label: 'Feeding',
+      color: activityColorMap.feeding,
+    },
+    {
+      key: 'diaper' as const,
+      icon: 'water' as const,
+      value: `${stats.wet}/${stats.dirty}`,
+      label: 'Diapers (W/D)',
+      color: activityColorMap.diaper,
+    },
+  ]
 
   return (
-    <FlatList
-      data={activities}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
-      renderItem={renderItem}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    <View style={styles.summaryContainer}>
+      {cards.map((c, i) => (
+        <View
+          key={c.key}
+          style={[
+            styles.summaryCard,
+            i < cards.length - 1 && { marginRight: 16 },
+          ]}
+        >
+          <Ionicons name={c.icon} size={20} color={c.color} />
+          <Text style={styles.summaryValue}>{c.value}</Text>
+          <Text style={styles.summaryLabel}>{c.label}</Text>
+          {c.secondary && (
+            <Text style={styles.summarySecondary}>{c.secondary}</Text>
+          )}
+        </View>
+      ))}
+    </View>
+  )
+}
+
+export default function TimelineView() {
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [refreshing, setRefreshing] = useState(false)
+  const [actionMenuVisible, setActionMenuVisible] = useState(false)
+  const [showModal, setShowModal] = useState<ActivityType | null>(null)
+  const [editItem, setEditItem] = useState<Activity | undefined>(undefined)
+  const user = auth.currentUser
+
+  // ─── Listen for real-time updates ─────────────────────────────
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return
+      const q = query(
+        collection(db, 'entries'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      )
+      const unsub = onSnapshot(q, snap => {
+        const docs = snap.docs.map(d => ({
+          ...(d.data() as Activity),
+          id: d.id,
+        }))
+        setActivities(docs)
+      })
+      return () => unsub()
+    }, [user])
+  )
+
+  // ─── Create or update an entry ────────────────────────────────
+  const handleSave = async (type: ActivityType, entry?: Activity) => {
+    if (!entry || !user) return
+
+    try {
+      const createdAt = entry.createdAt || new Date().toISOString()
+      const dateKey = createdAt.slice(0, 10)
+      // strip out the `id` field before writing
+      const { id, ...data } = {
+        ...entry,
+        userId: user.uid,
+        createdAt,
+        dateKey,
       }
-    />
-  );
+
+      if (id) {
+        await updateDoc(doc(db, 'entries', id), data)
+      } else {
+        await addDoc(collection(db, 'entries'), data)
+      }
+    } catch (err) {
+      console.error('Failed to save entry:', err)
+    } finally {
+      setEditItem(undefined)
+      setShowModal(null)
+    }
+  }
+
+  const handleItemPress = (item: Activity) => {
+    setEditItem(item)
+    setActionMenuVisible(false)
+    setShowModal(item.type)
+  }
+
+  const onRefresh = () => {
+    setRefreshing(true)
+    setTimeout(() => setRefreshing(false), 1000)
+  }
+
+  return (
+    <View style={styles.container}>
+      <SummaryView activities={activities} />
+
+      <FlatList
+        data={activities}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <ActivityItem activity={item} onPress={handleItemPress} />
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      />
+
+      <NLInputBar
+        placeholder="Ask about your baby..."
+        onSubmit={q =>
+          handleSave('health', {
+            id: '',
+            type: 'health',
+            title: q,
+            createdAt: new Date().toISOString(),
+          } as Activity)
+        }
+      />
+
+      <View style={styles.fabContainer} pointerEvents="box-none">
+        {actionMenuVisible &&
+          ACTIONS.map((act, i) => {
+            const R = 110
+            const angle = Math.PI * ((i + 1) / (ACTIONS.length + 1))
+            const x = Math.cos(angle) * R
+            const y = Math.sin(angle) * R
+            return (
+              <TouchableOpacity
+                key={act.type}
+                style={[
+                  styles.actionIcon,
+                  { backgroundColor: act.color },
+                  { transform: [{ translateX: x }, { translateY: -y }] },
+                ]}
+                onPress={() => {
+                  setEditItem(undefined)
+                  setActionMenuVisible(false)
+                  setShowModal(act.type)
+                }}
+              >
+                <Ionicons name={act.icon} size={24} color="#fff" />
+              </TouchableOpacity>
+            )
+          })}
+        <Fab
+          iconName={actionMenuVisible ? 'close' : 'add'}
+          onPress={() => setActionMenuVisible(v => !v)}
+        />
+      </View>
+
+      {showModal === 'sleep' && (
+        <SleepModal
+        onClose={() => setShowModal(null)}
+          onSave={e => handleSave('sleep', e as any)}
+        />
+      )}
+      {showModal === 'feeding' && (
+        <FeedingModal
+          onClose={() => setShowModal(null)}
+          onSave={e => handleSave('feeding', e as any)}
+        />
+      )}
+      {showModal === 'diaper' && (
+        <DiaperModal
+          onClose={() => setShowModal(null)}
+          onSave={e => handleSave('diaper', e as any)}
+        />
+      )}
+      {showModal === 'milestone' && (
+        <MilestoneModal
+          onClose={() => setShowModal(null)}
+          onSave={e => handleSave('milestone', e as any)}
+        />
+      )}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  list: { padding: spacing.md, paddingBottom: 100 },
+  container: { flex: 1 },
 
-  itemContainer: {
+  summaryContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: '#F7F3EE',
+    paddingHorizontal: 16,
+    marginBottom: 12,
     borderRadius: 12,
-    padding: spacing.sm,
-    marginBottom: spacing.sm,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
-  icon: { marginRight: spacing.md },
-  textContainer: { flex: 1 },
-  title: {
-    fontFamily: typography.fonts.medium,
-    fontSize: typography.sizes.md,
-    color: colors.textPrimary,
+  summaryCard: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  time: {
-    fontFamily: typography.fonts.regular,
-    fontSize: typography.sizes.sm,
-    color: colors.textSecondary,
+  summaryValue: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  summaryLabel: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#333',
+  },
+  summarySecondary: {
     marginTop: 2,
+    fontSize: 10,
+    fontStyle: 'italic',
+    color: '#C6B4A3',
   },
-
-  item_sleep: { borderLeftWidth: 4, borderLeftColor: colors.sleep },
-  item_feeding: { borderLeftWidth: 4, borderLeftColor: colors.feeding },
-  item_diaper: { borderLeftWidth: 4, borderLeftColor: colors.diaper },
-  item_milestone: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accentPrimary,
+  list: { padding: spacing.md, paddingBottom: spacing.md + 120 },
+  fabContainer: {
+    position: 'absolute',
+    bottom: spacing.md + 70,
+    alignSelf: 'center',
+    zIndex: 10,
   },
-  item_health: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accentSecondary,
+  actionIcon: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-});
+})

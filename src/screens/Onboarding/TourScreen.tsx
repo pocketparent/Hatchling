@@ -16,6 +16,8 @@ import { ScreenContainer }        from '../../components/layout/ScreenContainer'
 import { colors }                 from '../../theme/colors';
 import { spacing }                from '../../theme/spacing';
 import { typography }             from '../../theme/typography';
+import { doc, updateDoc }         from 'firebase/firestore'
+import { db, auth }               from '../../config/firebase'
 
 type Props = NativeStackScreenProps<OnboardingParamList, 'Tour'>;
 
@@ -34,9 +36,16 @@ export default function TourScreen({ navigation }: Props) {
     setCurrentIndex(idx);
   };
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
     // Exit onboarding and load the Main tabs
     navigation.getParent()?.navigate('Main');
+    
+    const user = auth.currentUser
+    if (user) {
+      await updateDoc(doc(db, 'users', user.uid), { onboarded: true })
+      console.log('✔️ onboarded flag set')
+    }
+    
   };
 
   return (
