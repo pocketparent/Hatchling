@@ -1,65 +1,84 @@
 // File: src/components/modals/DiaperModal.tsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   Switch,
+  TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { DiaperActivity, activityColorMap } from '../../screens/TodayView/types'
 import { EntryModal } from './EntryModal'
+import { DiaperActivity, activityColorMap } from '../../screens/TodayView/types'
 import { colors } from '../../theme/colors'
+import { Button } from '../common/Button'
+import { spacing } from '../../theme/spacing'
 
-interface DiaperModalProps {
-  onClose: () => void
-  onSave: (entry: DiaperActivity) => void
-}
+type DiaperType = 'wet' | 'dirty' | 'dry'
 
-export const DiaperModal: React.FC<DiaperModalProps> = ({ onClose, onSave }) => {
+export const DiaperModal: React.FC<{ onClose: () => void; onSave: (entry: DiaperActivity) => void }> = ({ onClose, onSave }) => {
   const accent = activityColorMap.diaper
-  const [selectedType, setSelectedType] = useState<'wet' | 'dry' | 'dirty'>('wet')
+
+  // State
+  const [selectedType, setSelectedType] = useState<DiaperType | ''>('')
   const [diarrhea, setDiarrhea] = useState(false)
   const [rash, setRash] = useState(false)
-  const [time, setTime] = useState(new Date())
+  const [time, setTime] = useState<Date>(new Date())
   const [showPicker, setShowPicker] = useState(false)
   const [notes, setNotes] = useState('')
 
-  const formattedTime = time.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: 'numeric',
-  })
+  // Validation: status must be selected
+  const canSave = selectedType !== ''
+
+  // Reset diarrhea if type changes away from 'dirty'
+  useEffect(() => {
+    if (selectedType !== 'dirty') {
+      setDiarrhea(false)
+    }
+  }, [selectedType])
+
+  const formattedTime = time.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
 
   const handleSave = () => {
+    if (!canSave) return
     const entry: DiaperActivity = {
       id: Date.now().toString(),
       type: 'diaper',
-      title: `Diaper: ${selectedType}${
-        selectedType === 'dirty' && diarrhea ? ' (diarrhea)' : ''
-      }`,
+      title: `Diaper: ${selectedType}${selectedType === 'dirty' && diarrhea ? ' (diarrhea)' : ''}`,
       createdAt: time.toISOString(),
       rash: rash || undefined,
-      notes: notes || undefined,
+      notes: notes.trim() || undefined,
     }
     onSave(entry)
   }
 
+  const onChange = (_: any, dt?: Date) => {
+    setShowPicker(false)
+    if (!dt) return
+    setTime(dt > new Date() ? new Date() : dt)
+  }
+
   return (
-    <EntryModal title="Log Diaper" accent={accent} onClose={onClose} onSave={handleSave}>
+    <EntryModal
+      title="Log Diaper"
+      accent={accent}
+      onClose={onClose}
+      onSave={handleSave}
+    >
       <View style={styles.typeSelector}>
-        {(['wet', 'dry', 'dirty'] as const).map((t) => (
+        {(['wet', 'dirty', 'dry'] as DiaperType[]).map(type => (
           <TouchableOpacity
-            key={t}
+            key={type}
             style={[
               styles.toggleOpt,
-              selectedType === t && { backgroundColor: accent, borderColor: accent },
+              selectedType === type && { backgroundColor: accent, borderColor: accent },
             ]}
-            onPress={() => setSelectedType(t)}
+            onPress={() => setSelectedType(prev => (prev === type ? '' : type))}
           >
-            <Text style={selectedType === t ? styles.toggleTxtActive : styles.toggleTxt}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
+            <Text style={selectedType === type ? styles.toggleTxtActive : styles.toggleTxt}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -95,12 +114,8 @@ export const DiaperModal: React.FC<DiaperModalProps> = ({ onClose, onSave }) => 
         <DateTimePicker
           value={time}
           mode="time"
-          display="default"
-          onChange={(_, d) => {
-            setShowPicker(false)
-            if (d) setTime(d)
-          }}
-          textColor={accent}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onChange}
         />
       )}
 
@@ -121,12 +136,12 @@ const styles = StyleSheet.create({
   typeSelector: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   toggleOpt: {
     flex: 1,
-    marginHorizontal: 4,
-    padding: 10,
+    marginHorizontal: spacing.xs,
+    padding: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
@@ -143,15 +158,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: spacing.sm,
   },
   switchLabel: {
     fontSize: 16,
     color: colors.textPrimary,
   },
   fieldHeader: {
-    marginTop: 12,
-    marginBottom: 4,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
     fontSize: 14,
     fontWeight: '500',
     color: colors.textPrimary,
@@ -160,7 +175,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
-    padding: 10,
+    padding: spacing.sm,
+    marginBottom: spacing.md,
   },
   pickerText: {
     color: colors.textPrimary,
@@ -169,9 +185,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
-    padding: 10,
+    padding: spacing.sm,
     height: 80,
     textAlignVertical: 'top',
     color: colors.textPrimary,
+    marginBottom: spacing.md,
   },
 })

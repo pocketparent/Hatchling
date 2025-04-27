@@ -8,15 +8,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import {
   Activity,
-  FeedingActivity,
-  BreastFeedingActivity,
-  BottleFeedingActivity,
   SleepActivity,
+  FeedingActivity,
   DiaperActivity,
-  activityColorMap,
   activityIconMap,
+  activityColorMap,
 } from '../screens/TodayView/types';
 import { colors } from '../theme/colors';
+import { formatTime } from '../utils/timeUtils';
 
 interface Props {
   activity: Activity;
@@ -24,110 +23,61 @@ interface Props {
 }
 
 export const ActivityItem: React.FC<Props> = ({ activity, onPress }) => {
-  const fmt = (iso: string) => {
-    try {
-      const date = new Date(iso);
-      return isNaN(date.getTime())
-        ? '—'
-        : date.toLocaleTimeString([], {
-            hour: 'numeric',
-            minute: '2-digit',
-          });
-    } catch {
-      return '—';
-    }
-  };
-
   let detail = '';
-  let timeLabel = (activity.createdAt);
+  let timeLabel = formatTime(activity.createdAt);
+  let displayTitle = activity.title;
 
   switch (activity.type) {
     case 'sleep': {
       const sa = activity as SleepActivity;
-      const start = sa.start;
-      const end = sa.end;
-    
-      // Format for time label (top right)
-      timeLabel = `${(start)} - ${(end)}`;
-    
-      // Title for line 1
-      const label = sa.period === 'night' ? 'Nighttime Sleep' : 'Nap';
-      activity.title = label;
-    
-      // Duration in minutes
-      let durationText = '';
-      if (start && end) {
-        const startTime = new Date(start).getTime();
-        const endTime = new Date(end).getTime();
-        if ((startTime) && (endTime)) {
-          const durationMin = Math.round((endTime - startTime) / 60000);
-          durationText = `${durationMin}m`;
-        }
-      }
-    
-      // Sleep details for line 2
-      const interruptionCount = sa.interruptions?.length || 0;
-      const moodText = sa.mood ? `  |  Woke up ${sa.mood}` : '';
-      detail = `${durationText}  |  Awake ${interruptionCount}x${moodText}`;
+      displayTitle = sa.period === 'night' ? 'Nighttime Sleep' : 'Nap';
+      timeLabel = `${formatTime(sa.start)} - ${formatTime(sa.end)}`;
+      const startMs = sa.start ? new Date(sa.start).getTime() : NaN;
+      const endMs = sa.end ? new Date(sa.end).getTime() : NaN;
+      const durationMin = !isNaN(startMs) && !isNaN(endMs)
+        ? Math.round((endMs - startMs) / 60000)
+        : 0;
+      const interrupts = sa.interruptions?.length || 0;
+      const moodText = sa.mood ? ` | Woke ${sa.mood}` : '';
+      detail = `${durationMin}m | Awoke ${interrupts}x${moodText}`;
       break;
     }
-    
-  
     case 'feeding': {
       const fa = activity as FeedingActivity;
-      activity.title = 'Feeding';
-      timeLabel = (fa.createdAt);
-  
+      displayTitle = 'Feeding';
+      timeLabel = formatTime(fa.createdAt);
       const parts: string[] = [];
-  
-      if ((fa as BottleFeedingActivity).mode === 'bottle' && 'amount' in fa) {
-        parts.push(`Bottle (${fa.amount}${fa.unit || 'oz'})`);
-      }
-  
-      if ((fa as BreastFeedingActivity).mode === 'breast' && 'start' in fa && 'end' in fa) {
-        const dur =
-          fa.start && fa.end
-            ? Math.round(
-                (new Date(fa.end).getTime() - new Date(fa.start).getTime()) / 60000
-              )
-            : 0;
-        parts.push(`Breast (${dur}m)`);
-      }
-  
-      if ((fa as any).mode === 'solids') {
+      if (fa.mode === 'bottle') parts.push(`Bottle (${fa.amount}${fa.unit || 'oz'})`);
+      else if (fa.mode === 'breast') {
+        const s = fa.start ? new Date(fa.start).getTime() : NaN;
+        const e = fa.end ? new Date(fa.end).getTime() : NaN;
+        const d = !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
+        parts.push(`Breast (${d}m)`);
+      } else if (fa.mode === 'solids') {
         parts.push('Solids');
       }
-  
-      detail = parts.join('  |  ');
+      detail = parts.join(' | ');
       break;
     }
-  
     case 'diaper': {
       const da = activity as DiaperActivity;
-      activity.title = 'Diaper';
-      timeLabel = (da.createdAt);
-  
+      displayTitle = 'Diaper';
+      timeLabel = formatTime(da.createdAt);
       const parts: string[] = [];
-if (da.status) parts.push(da.status); 
-if (da.rash) parts.push('Rash');
-if (da.diarrhea) parts.push('Diarrhea');
-
-detail = parts.join('  |  ');
-  
-      detail = parts.join('  |  ');
+      if (da.status) parts.push(da.status);
+      if (da.rash) parts.push('Rash');
+      if (da.diarrhea) parts.push('Diarrhea');
+      detail = parts.join(' | ');
       break;
     }
-  
     case 'milestone':
+      displayTitle = activity.title;
       detail = (activity as any).notes || '';
       break;
-  
     case 'health':
+      displayTitle = activity.title;
       detail = (activity as any).details || '';
       break;
-  
-    default:
-      detail = '';
   }
 
   return (
@@ -138,18 +88,16 @@ detail = parts.join('  |  ');
           size={20}
           color={activityColorMap[activity.type]}
         />
-       <View style={{ marginLeft: 8 }}>
-        <Text style={styles.title}>{activity.title}</Text>
-        {detail.length > 0 && (
-          <Text style={styles.detail}>{detail}</Text>
-        )}
+        <View style={styles.leftText}>
+          <Text style={styles.title}>{displayTitle}</Text>
+          {!!detail && <Text style={styles.detail}>{detail}</Text>}
+        </View>
       </View>
-    </View>
-    <View style={styles.right}>
-      <Text style={styles.time}>{timeLabel}</Text>
-    </View>
-  </TouchableOpacity>
-);
+      <View style={styles.right}>
+        <Text style={styles.time}>{timeLabel}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -167,30 +115,10 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    maxWidth: '70%',
-  },
-  title: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: colors.textPrimary,
-    flexShrink: 1,
-  },
-  right: {
-    alignItems: 'flex-end',
-    maxWidth: '40%',
-  },
-  detail: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 4,
-    marginLeft: 8,
-  },
-  time: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 4,
-  },
+  left: { flexDirection: 'row', alignItems: 'center', maxWidth: '70%' },
+  leftText: { marginLeft: 8 },
+  title: { fontSize: 16, color: colors.textPrimary, flexShrink: 1 },
+  detail: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
+  right: { alignItems: 'flex-end', maxWidth: '40%' },
+  time: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
 });

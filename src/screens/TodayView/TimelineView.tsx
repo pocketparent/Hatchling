@@ -1,4 +1,4 @@
-// File: src/screens/TodayView/TimelineView.tsx
+/// File: src/screens/TodayView/TimelineView.tsx
 
 import React, { useState, useCallback } from 'react'
 import {
@@ -159,7 +159,6 @@ export default function TimelineView() {
   const [editItem, setEditItem] = useState<Activity | undefined>(undefined)
   const user = auth.currentUser
 
-  // ─── Listen for real-time updates ─────────────────────────────
   useFocusEffect(
     useCallback(() => {
       if (!user) return
@@ -179,31 +178,35 @@ export default function TimelineView() {
     }, [user])
   )
 
-  // ─── Create or update an entry ────────────────────────────────
+  // ─── Create or update an entry ─────────────────────────────────────
   const handleSave = async (type: ActivityType, entry?: Activity) => {
-    if (!entry || !user) return
+    if (!entry || !auth.currentUser) return
+    const userId = auth.currentUser.uid
+    const createdAt = entry.createdAt || new Date().toISOString()
+    const dateKey = createdAt.slice(0, 10)
+
+    // build payload and drop undefineds
+    const payload: Record<string, any> = {
+      ...entry,
+      userId,
+      createdAt,
+      dateKey,
+    }
+    delete payload.id
+    Object.keys(payload).forEach(k => {
+      if (payload[k] === undefined) delete payload[k]
+    })
 
     try {
-      const createdAt = entry.createdAt || new Date().toISOString()
-      const dateKey = createdAt.slice(0, 10)
-      // strip out the `id` field before writing
-      const { id, ...data } = {
-        ...entry,
-        userId: user.uid,
-        createdAt,
-        dateKey,
-      }
-
-      if (id) {
-        await updateDoc(doc(db, 'entries', id), data)
+      if (entry.id) {
+        await updateDoc(doc(db, 'entries', entry.id), payload)
       } else {
-        await addDoc(collection(db, 'entries'), data)
+        await addDoc(collection(db, 'entries'), payload)
       }
+      setShowModal(null)
+      setEditItem(undefined)
     } catch (err) {
       console.error('Failed to save entry:', err)
-    } finally {
-      setEditItem(undefined)
-      setShowModal(null)
     }
   }
 
@@ -279,7 +282,7 @@ export default function TimelineView() {
 
       {showModal === 'sleep' && (
         <SleepModal
-        onClose={() => setShowModal(null)}
+          onClose={() => setShowModal(null)}
           onSave={e => handleSave('sleep', e as any)}
         />
       )}

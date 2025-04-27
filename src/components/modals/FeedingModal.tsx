@@ -5,356 +5,336 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  ScrollView,
   StyleSheet,
+  Platform,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
+import { EntryModal } from './EntryModal'
+import { colors } from '../../theme/colors'
+import { spacing } from '../../theme/spacing'
 import {
   BreastFeedingActivity,
   BottleFeedingActivity,
   SolidsFeedingActivity,
   activityColorMap,
 } from '../../screens/TodayView/types'
-import { EntryModal } from './EntryModal'
-import { colors } from '../../theme/colors'
 
+// Supported feeding modes
 type Mode = 'breast' | 'bottle' | 'solids'
+// Picker context
+type PickerContext = { type: 'time' }
 
-export const FeedingModal: React.FC<{
-  onClose(): void
-  onSave(
-    entry: BreastFeedingActivity | BottleFeedingActivity | SolidsFeedingActivity
-  ): void
-}> = ({ onClose, onSave }) => {
+interface Props {
+  onClose: () => void
+  onSave: (
+    entry:
+      | BreastFeedingActivity
+      | BottleFeedingActivity
+      | SolidsFeedingActivity
+      | Array<BreastFeedingActivity | BottleFeedingActivity | SolidsFeedingActivity>
+  ) => void
+}
+
+export const FeedingModal: React.FC<Props> = ({ onClose, onSave }) => {
   const accent = activityColorMap.feeding
-  const [mode, setMode] = useState<Mode>('breast')
-  const [showPicker, setShowPicker] = useState(false)
-  const [startTime, setStartTime] = useState(new Date())
-  const [leftMins, setLeftMins] = useState('0')
-  const [rightMins, setRightMins] = useState('0')
-  const [bottleType, setBottleType] = useState<'breastmilk' | 'formula'>(
-    'breastmilk'
-  )
-  const [bottleAmount, setBottleAmount] = useState('')
-  const [foods, setFoods] = useState<{ name: string; liked?: boolean | null }[]>([])
-  const [notes, setNotes] = useState('')
 
-  const fmt = (d: Date) =>
-    d.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
+  // Shared state
+  const [startTime, setStartTime] = useState<Date>(new Date())
+  const [picker, setPicker] = useState<PickerContext | null>(null)
+  const [selectedModes, setSelectedModes] = useState<Mode[]>(['breast'])
+  const [notes, setNotes] = useState<string>('')
 
-  const entered = {
-    breast: Number(leftMins) > 0 || Number(rightMins) > 0,
-    bottle: !!bottleAmount,
-    solids: foods.length > 0 && foods.every(f => f.name),
+  // Breast mode state
+  const [leftMins, setLeftMins] = useState<string>('')
+  const [rightMins, setRightMins] = useState<string>('')
+
+  // Bottle mode state (breastmilk vs formula oz)
+  const [breastMilkOz, setBreastMilkOz] = useState<string>('')
+  const [formulaOz, setFormulaOz] = useState<string>('')
+
+  // Solids mode state
+  const [foods, setFoods] = useState<{ name: string; liked: boolean | null }[]>([])
+
+  const now = new Date()
+  const fmt = (d: Date) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
+
+  // Toggle mode selection and clear inputs
+  const toggleMode = (mode: Mode) => {
+    setSelectedModes(prev => {
+      if (prev.includes(mode)) {
+        if (mode === 'breast') {
+          setLeftMins('')
+          setRightMins('')
+        }
+        if (mode === 'bottle') {
+          setBreastMilkOz('')
+          setFormulaOz('')
+        }
+        if (mode === 'solids') setFoods([])
+        return prev.filter(m => m !== mode)
+      }
+      return [...prev, mode]
+    })
   }
-  const canSave = () => {
-    if (mode === 'breast') return entered.breast
-    if (mode === 'bottle') return entered.bottle
-    if (mode === 'solids') return entered.solids
-    return false
-  }
 
+  // Validation
+  const validBreast = (Number(leftMins) || 0) + (Number(rightMins) || 0) > 0
+  const validBottle = (Number(breastMilkOz) || 0) + (Number(formulaOz) || 0) > 0
+  const validSolids = foods.length > 0 && foods.every(f => f.name.trim().length > 0)
+  const canSave =
+    selectedModes.length > 0 &&
+    selectedModes.every(m =>
+      m === 'breast'
+        ? validBreast
+        : m === 'bottle'
+        ? validBottle
+        : m === 'solids'
+        ? validSolids
+        : false
+    )
+
+  // Save handler
   const handleSave = () => {
-    const base = {
-      id: Date.now().toString(),
-      type: 'feeding' as const,
-      createdAt: startTime.toISOString(),
-    }
-    if (mode === 'breast') {
-      const entry: BreastFeedingActivity = {
-        ...base,
+    if (!canSave) return
+    const timestamp = startTime.toISOString()
+    const entries: Array<BreastFeedingActivity | BottleFeedingActivity | SolidsFeedingActivity> = []
+
+    // Breast
+    if (selectedModes.includes('breast')) {
+      const total = (Number(leftMins) || 0) + (Number(rightMins) || 0)
+      entries.push({
+        id: Date.now().toString(),
+        type: 'feeding',
         mode: 'breast',
-        start: startTime.toISOString(),
-        end: startTime.toISOString(),
+        start: timestamp,
+        end: timestamp,
+        createdAt: timestamp,
         side: Number(rightMins) > Number(leftMins) ? 'Right' : 'Left',
-        notes: notes || undefined,
-        title: `Breast L:${leftMins}m R:${rightMins}m`,
-      }
-      return onSave(entry)
+        title: `Breast: ${total} min`,
+        notes: notes.trim() || undefined,
+      })
     }
-    if (mode === 'bottle') {
-      const entry: BottleFeedingActivity = {
-        ...base,
+
+    // Bottle entries (separate)
+    if (selectedModes.includes('bottle')) {
+      const bm = Number(breastMilkOz) || 0
+      const fm = Number(formulaOz) || 0
+      if (bm > 0) entries.push({
+        id: `${Date.now()}-bm`,
+        type: 'feeding',
         mode: 'bottle',
-        amount: Number(bottleAmount),
+        createdAt: timestamp,
+        amount: bm,
         unit: 'oz',
-        notes: notes || undefined,
-        title: `Bottle: ${bottleAmount} oz`,
-      }
-      return onSave(entry)
+        title: `Bottle (breastmilk): ${bm} oz`,
+        notes: notes.trim() || undefined,
+      })
+      if (fm > 0) entries.push({
+        id: `${Date.now()}-fm`,
+        type: 'feeding',
+        mode: 'bottle',
+        createdAt: timestamp,
+        amount: fm,
+        unit: 'oz',
+        title: `Bottle (formula): ${fm} oz`,
+        notes: notes.trim() || undefined,
+      })
     }
-    // solids
-    const names = foods.map(f => f.name).join(', ')
-    const allLiked = foods.every(f => f.liked)
-    const reaction: 'Liked' | 'Disliked' = allLiked ? 'Liked' : 'Disliked'
-    const entry: SolidsFeedingActivity = {
-      ...base,
-      mode: 'solids',
-      start: startTime.toISOString(),
-      amountDesc: names,
-      reaction,
-      notes: notes || undefined,
-      title: `Solids: ${names}`,
+
+    // Solids
+    if (selectedModes.includes('solids')) {
+      const names = foods.map(f => f.name.trim()).join(', ')
+      const reaction = foods.every(f => f.liked) ? 'Liked' : 'Disliked'
+      entries.push({
+        id: `${Date.now()}-sol`,
+        type: 'feeding',
+        mode: 'solids',
+        createdAt: timestamp,
+        amountDesc: names,
+        reaction,
+        title: `Solids: ${names}`,
+        notes: notes.trim() || undefined,
+      })
     }
-    return onSave(entry)
+
+    onSave(entries.length > 1 ? entries : entries[0])
+    onClose()
   }
 
-  const addFood = () => setFoods(f => [...f, { name: '', liked: null }])
-  const updateFood = (i: number, name: string) => {
-    const copy = [...foods]
-    copy[i].name = name
-    setFoods(copy)
+  // Picker
+  const onPickerChange = (_: any, dt?: Date) => {
+    setPicker(null)
+    if (!dt) return
+    setStartTime(dt > now ? now : dt)
   }
-  const setFoodLike = (i: number, liked: boolean) => {
-    const copy = [...foods]
-    copy[i].liked = liked
-    setFoods(copy)
-  }
+
+  // Solids handlers
+  const addFood = () => setFoods(prev => [...prev, { name: '', liked: null }])
+  const deleteFood = (i: number) => setFoods(prev => prev.filter((_, idx) => idx !== i))
+  const updateFood = (i: number, name: string) => setFoods(prev => prev.map((f, idx) => idx === i ? { ...f, name } : f))
+  const setFoodLike = (i: number, liked: boolean) => setFoods(prev => prev.map((f, idx) => idx === i ? { ...f, liked } : f))
 
   return (
     <EntryModal title="Log Feeding" accent={accent} onClose={onClose} onSave={handleSave}>
-      <View style={styles.toggleRow}>
-        {(['breast', 'bottle', 'solids'] as Mode[]).map(m => (
-          <TouchableOpacity
-            key={m}
-            style={[
-              styles.toggleOpt,
-              mode === m && { backgroundColor: accent, borderColor: accent },
-              entered[m] && styles.toggleOptDone,
-            ]}
-            onPress={() => setMode(m)}
-          >
-            <Text style={mode === m ? styles.toggleTxtActive : styles.toggleTxt}>
-              {m === 'breast' ? '🍼 Breast' : m === 'bottle' ? '🍼 Bottle' : '🍽 Solids'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.label}>Start Time</Text>
-      <TouchableOpacity style={styles.picker} onPress={() => setShowPicker(true)}>
-        <Text style={styles.pickerTxt}>{fmt(startTime)}</Text>
-      </TouchableOpacity>
-      {showPicker && (
-        <DateTimePicker
-          value={startTime}
-          mode="time"
-          display="default"
-          onChange={(_, d) => {
-            setShowPicker(false)
-            if (d) setStartTime(d)
-          }}
-        />
-      )}
-
-      {mode === 'breast' && (
-        <View style={styles.timeRow}>
-          {['Left', 'Right'].map((sideName, idx) => {
-            const val = idx === 0 ? leftMins : rightMins
-            const setter = idx === 0 ? setLeftMins : setRightMins
-            return (
-              <View key={sideName} style={styles.sideContainer}>
-                <View style={styles.timeBox}>
-                  <TextInput
-                    style={styles.timeInput}
-                    keyboardType="numeric"
-                    value={val}
-                    onChangeText={setter}
-                    onFocus={() => val === '0' && setter('')}
-                  />
-                  <Text style={styles.unit}>mins</Text>
-                </View>
-                <Text style={[styles.sideLabel, { color: accent }]}>
-                  {sideName} Side
-                </Text>
-              </View>
-            )
-          })}
-        </View>
-      )}
-
-      {mode === 'bottle' && (
-        <>
-          <Text style={styles.label}>Milk Type</Text>
-          <View style={styles.toggleRow}>
-            {(['breastmilk', 'formula'] as const).map(t => (
-              <TouchableOpacity
-                key={t}
-                style={[
-                  styles.toggleOpt,
-                  bottleType === t && { backgroundColor: accent, borderColor: accent },
-                ]}
-                onPress={() => setBottleType(t)}
-              >
-                <Text style={bottleType === t ? styles.toggleTxtActive : styles.toggleTxt}>
-                  {t === 'breastmilk' ? 'Breastmilk' : 'Formula'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={styles.label}>Amount (oz)</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="e.g. 4"
-            value={bottleAmount}
-            onChangeText={setBottleAmount}
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Time Picker */}
+        <Text style={styles.label}>Time</Text>
+        <TouchableOpacity style={styles.picker} onPress={() => setPicker({ type: 'time' })}>
+          <Text style={styles.pickerTxt}>{fmt(startTime)}</Text>
+        </TouchableOpacity>
+        {picker && (
+          <DateTimePicker
+            value={startTime}
+            mode="time"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={onPickerChange}
           />
-        </>
-      )}
+        )}
 
-      {mode === 'solids' && (
-        <>
-          <Text style={styles.label}>Foods</Text>
-          {foods.map((f, i) => (
-            <View key={i} style={styles.foodRow}>
-              <TextInput
-                style={[styles.input, { flex: 1 }]}
-                placeholder="Food name"
-                value={f.name}
-                onChangeText={t => updateFood(i, t)}
-              />
-              <View style={styles.likeRow}>
-                <TouchableOpacity onPress={() => setFoodLike(i, false)}>
-                  <Ionicons
-                    name={f.liked === false ? 'heart-dislike' : 'heart-dislike-outline'}
-                    size={24}
-                    color={f.liked === false ? accent : colors.textSecondary}
+        {/* Modes */}
+        <Text style={styles.sectionHeader}>Modes</Text>
+        <View style={styles.toggleRow}>
+          {(['breast','bottle','solids'] as Mode[]).map(m => (
+            <TouchableOpacity
+              key={m}
+              style={[styles.chip, selectedModes.includes(m) && { backgroundColor: accent, borderColor: accent }]} 
+              onPress={() => toggleMode(m)}>
+              <Text style={selectedModes.includes(m) ? styles.chipTxtActive : styles.chipTxt}>
+                {m==='breast'?'🥛 Breast':m==='bottle'?'🍼 Bottle':'🍽 Solids'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Breast Section */}
+        {selectedModes.includes('breast') && (
+          <>
+            <Text style={styles.sectionHeader}>Breastfeeding</Text>
+            <View style={styles.timeRow}>
+              {['Left','Right'].map((side,i)=>(
+                <View key={side} style={styles.sideContainer}>
+                  <Text style={styles.subLabel}>{`${side} Side (min)`}</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={i===0?leftMins:rightMins}
+                    onChangeText={v=>i===0?setLeftMins(v):setRightMins(v)}
                   />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setFoodLike(i, true)}
-                  style={{ marginLeft: 12 }}
-                >
-                  <Ionicons
-                    name={f.liked === true ? 'heart' : 'heart-outline'}
-                    size={24}
-                    color={f.liked === true ? accent : colors.textSecondary}
-                  />
-                </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Bottle Section */}
+        {selectedModes.includes('bottle') && (
+          <>
+            <Text style={styles.sectionHeader}>Bottle Feeding</Text>
+            <View style={styles.timeRow}>
+              <View style={styles.sideContainer}>
+                <Text style={styles.subLabel}>Breastmilk (oz)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={breastMilkOz}
+                  placeholder="e.g. 4"
+                  onChangeText={setBreastMilkOz}
+                />
+              </View>
+              <View style={styles.sideContainer}>
+                <Text style={styles.subLabel}>Formula (oz)</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={formulaOz}
+                  placeholder="e.g. 4"
+                  onChangeText={setFormulaOz}
+                />
               </View>
             </View>
-          ))}
-          <TouchableOpacity style={styles.addBtn} onPress={addFood}>
-            <Text style={[styles.addTxt, { color: accent }]}>+ Add Another Food</Text>
-          </TouchableOpacity>
-        </>
-      )}
+          </>
+        )}
 
-      <Text style={styles.label}>Notes</Text>
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        multiline
-        placeholder="Any extra details..."
-        value={notes}
-        onChangeText={setNotes}
-      />
+        {/* Solids Section */}
+        {selectedModes.includes('solids') && (
+          <>
+            <Text style={styles.sectionHeader}>Solids</Text>
+            {foods.map((f,i)=>(
+              <View key={`food-${i}`} style={styles.foodRow}>
+                <TextInput
+                  style={[styles.input,{flex:1}]}
+                  placeholder="Food name"
+                  value={f.name}
+                  onChangeText={t=>updateFood(i,t)}
+                />
+                <TouchableOpacity onPress={()=>deleteFood(i)} style={{marginRight:spacing.sm}}>
+                  <Ionicons name="trash-outline" size={20} color={colors.textSecondary}/>
+                </TouchableOpacity>
+                <View style={styles.likeRow}>
+                  <TouchableOpacity onPress={()=>setFoodLike(i,false)}>
+                    <Ionicons name={f.liked===false?'heart-dislike':'heart-dislike-outline'} size={20} color={f.liked===false?accent:colors.textSecondary}/>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={()=>setFoodLike(i,true)} style={{marginLeft:spacing.sm}}>
+                    <Ionicons name={f.liked===true?'heart':'heart-outline'} size={20} color={f.liked===true?accent:colors.textSecondary}/>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+            <TouchableOpacity onPress={addFood}>
+              <Text style={[styles.addLink,{color:accent}]}>+ Add Food</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {/* Notes */}
+        <Text style={styles.sectionHeader}>Notes</Text>
+        <TextInput
+          style={[styles.input,styles.notesInput]}
+          multiline
+          placeholder="Optional notes..."
+          value={notes}
+          onChangeText={setNotes}
+        />
+      </ScrollView>
     </EntryModal>
   )
 }
 
 const styles = StyleSheet.create({
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 8,
+  container:{padding:spacing.md},
+  label:{fontSize:14,fontWeight:'500',color:colors.textPrimary},
+  picker:{
+    marginTop:4,marginBottom:spacing.md,padding:spacing.md,
+    borderWidth:1,borderColor:colors.border,borderRadius:8,
   },
-  toggleOpt: {
-    flex: 1,
-    marginHorizontal: 4,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    alignItems: 'center',
+  pickerTxt:{fontSize:16,color:colors.textPrimary},
+  toggleRow:{flexDirection:'row',marginBottom:spacing.md},
+  chip:{
+    flex:1,padding:spacing.sm,borderWidth:1,borderColor:colors.border,
+    borderRadius:8,alignItems:'center',marginHorizontal:spacing.xs,
   },
-  toggleTxt: {
-    color: colors.textSecondary,
+  chipTxt:{fontSize:14,color:colors.textSecondary},
+  chipTxtActive:{fontSize:14,color:'#fff',fontWeight:'600'},
+  sectionHeader:{
+    marginTop:spacing.md,fontSize:14,fontWeight:'600',color:colors.textPrimary
   },
-  toggleTxtActive: {
-    color: '#fff',
-    fontWeight: '600',
+  timeRow:{flexDirection:'row',justifyContent:'space-between'},
+  sideContainer:{flex:1,paddingRight:spacing.sm},
+  subLabel:{fontSize:13,color:colors.textSecondary,marginBottom:4},
+  input:{
+    borderWidth:1,borderColor:colors.border,borderRadius:8,
+    padding:spacing.sm,color:colors.textPrimary,marginBottom:spacing.md
   },
-  toggleOptDone: {
-    borderWidth: 2,
-    borderColor: colors.accentSecondary,
+  bottleRow:{flexDirection:'row',alignItems:'center'},
+  unitBtn:{
+    marginLeft:spacing.sm,padding:spacing.sm,
+    borderWidth:1,borderColor:colors.border,borderRadius:8
   },
-  label: {
-    marginTop: 12,
-    marginBottom: 4,
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textPrimary,
-  },
-  picker: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 10,
-  },
-  pickerTxt: {
-    color: colors.textPrimary,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 12,
-  },
-  sideContainer: {
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  timeBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
-    width: '100%',
-  },
-  timeInput: {
-    flex: 1,
-    fontSize: 20,
-    textAlign: 'center',
-    color: colors.textPrimary,
-    padding: 0,
-    margin: 0,
-  },
-  unit: {
-    marginLeft: 4,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  sideLabel: {
-    marginTop: 6,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 8,
-    color: colors.textPrimary,
-    marginBottom: 8,
-  },
-  foodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  likeRow: {
-    flexDirection: 'row',
-    marginLeft: 8,
-  },
-  addBtn: {
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  addTxt: {
-    fontWeight: '500',
-  },
+  unitTxt:{fontSize:14,color:colors.textPrimary},
+  foodRow:{flexDirection:'row',alignItems:'center',marginVertical:spacing.xs},
+  likeRow:{flexDirection:'row',marginLeft:spacing.sm},
+  addLink:{marginTop:spacing.sm,fontWeight:'500'},
+  notesInput:{height:80,textAlignVertical:'top'},
 })

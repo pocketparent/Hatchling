@@ -1,249 +1,237 @@
 // File: src/components/modals/SleepModal.tsx
-
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
+  Platform,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
-import {
-  SleepActivity,
-  activityColorMap,
-} from '../../screens/TodayView/types'
 import { EntryModal } from './EntryModal'
+import { activityColorMap } from '../../screens/TodayView/types'
 import { colors } from '../../theme/colors'
 import { spacing } from '../../theme/spacing'
+import { SleepActivity } from '../../screens/TodayView/types'
 
-type Mode = 'sleep' | 'wake'
+type Period = 'Day' | 'Night'
+type Mood = 'Happy' | 'Fussy' | ''
+interface Interruption { start: Date; duration: string }
 
-interface SleepModalProps {
-  initialEntry?: SleepActivity
-  onClose(): void
-  onSave(entry: SleepActivity): void
-}
+type PickerContext =
+  | { type: 'start' }
+  | { type: 'end' }
+  | { type: 'interruption'; index: number }
 
-export const SleepModal: React.FC<SleepModalProps> = ({
-  initialEntry,
-  onClose,
-  onSave,
-}) => {
+export const SleepModal: React.FC<{ onClose: () => void; onSave: (entry: SleepActivity | SleepActivity[]) => void }> = ({ onClose, onSave }) => {
   const accent = activityColorMap.sleep
-
-  // ─── State (with initialEntry) ───────────────────────────────
-  const [mode, setMode] = useState<Mode>('sleep')
-  const [dayPeriod, setDayPeriod] = useState<'Day' | 'Night'>('Day')
+  const [period, setPeriod] = useState<Period>('Day')
   const [startTime, setStartTime] = useState<Date>(new Date())
   const [endTime, setEndTime] = useState<Date | null>(null)
-  const [showPickerFor, setShowPickerFor] = useState<'start' | 'end' | null>(null)
-  const [wakes, setWakes] = useState<{ start: Date; duration: string }[]>([])
-  const [editingWake, setEditingWake] = useState<number | null>(null)
-  const [pickerForWake, setPickerForWake] = useState(false)
-  const [mood, setMood] = useState<'Happy' | 'Fussy' | ''>('')
+  const [interruptions, setInterruptions] = useState<Interruption[]>([])
+  const [mood, setMood] = useState<Mood>('')
   const [notes, setNotes] = useState<string>('')
+  const [picker, setPicker] = useState<PickerContext | null>(null)
 
-  useEffect(() => {
-    if (!initialEntry) return
-    // Only single‐entry (sleep) editing supported
-    setMode('sleep')
-    setStartTime(new Date(initialEntry.start))
-    setEndTime(new Date(initialEntry.end))
-    setDayPeriod(
-      (initialEntry.period.charAt(0).toUpperCase() +
-        initialEntry.period.slice(1)) as 'Day' | 'Night'
-    )
-    setMood(initialEntry.mood ?? '')
-    setNotes(initialEntry.notes ?? '')
-  }, [initialEntry])
+  const fmtTime = (d: Date) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
+  const now = new Date()
 
-  const fmt = (d: Date) =>
-    d.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
+  const canSave = !!(endTime && endTime >= startTime)
 
-  const addWake = () =>
-    setWakes(ws => [...ws, { start: new Date(), duration: '5' }])
-  const updateWakeTime = (i: number, dt: Date) => {
-    setWakes(ws => {
-      const c = [...ws]
-      c[i].start = dt
-      return c
-    })
+  const addInterruption = () => {
+    setInterruptions(prev => [...prev, { start: new Date(), duration: '5' }])
   }
-  const updateWakeDur = (i: number, v: string) => {
-    setWakes(ws => {
-      const c = [...ws]
-      c[i].duration = v
-      return c
-    })
+
+  const onChange = (_: any, dt?: Date) => {
+    if (!dt) {
+      setPicker(null)
+      return
+    }
+    // prevent future times
+    const validDate = dt > now ? now : dt
+    if (picker) {
+      if (picker.type === 'start') setStartTime(validDate)
+      if (picker.type === 'end') setEndTime(validDate)
+      if (picker.type === 'interruption') {
+        setInterruptions(prev => {
+          const updated = [...prev]
+          updated[picker.index] = { ...updated[picker.index], start: validDate }
+          return updated
+        })
+      }
+    }
+    setPicker(null)
   }
 
   const handleSave = () => {
-    if (mode === 'sleep') {
-      const end = endTime ?? startTime
-      const mins = Math.round((end.getTime() - startTime.getTime()) / 60000)
-      const entry: SleepActivity = {
-        id: initialEntry?.id ?? '',
-        type: 'sleep',
-        title: `Sleep (${dayPeriod}): ${fmt(startTime)}–${fmt(end)}`,
-        createdAt: startTime.toISOString(),
-        start: startTime.toISOString(),
-        end: end.toISOString(),
-        duration: `${mins} min`,
-        period: dayPeriod.toLowerCase() as 'day' | 'night',
-        mood: mood || undefined,
-        notes: notes || undefined,
-      }
-      onSave(entry)
-    } else {
-      // If you do want to batch wakes, you can loop here:
-      // onSave(entriesArray)
-      // But TimelineView only expects a single SleepActivity, so we skip that.
-      onClose()
+    if (!canSave) return
+    // primary sleep entry
+    const sleepEntry: SleepActivity = {
+      id: Date.now().toString(),
+      type: 'sleep',
+      start: startTime.toISOString(),
+      end: (endTime || startTime).toISOString(),
+      createdAt: startTime.toISOString(),
+      duration: `${Math.round(((endTime || startTime).getTime() - startTime.getTime())/60000)} min`,
+      period: period.toLowerCase() as 'day' | 'night',
+      title: `Sleep (${period}): ${fmtTime(startTime)}–${fmtTime(endTime || startTime)}`,
+      ...(notes.trim() && { notes: notes.trim() }),
+      ...(mood && { mood }),
     }
+
+    // interruptions as separate entries when tagging 'wake'
+    if (interruptions.length > 0) {
+      const wakeEntries = interruptions.map((intr, i) => {
+        const dur = parseInt(intr.duration, 10) || 0
+        const endIntr = new Date(intr.start.getTime() + dur*60000)
+        return {
+          id: `${Date.now()}_${i}`,
+          type: 'sleep',
+          start: intr.start.toISOString(),
+          end: endIntr.toISOString(),
+          createdAt: intr.start.toISOString(),
+          duration: `${dur} min`,
+          period: 'night',
+          title: `Wake: ${fmtTime(intr.start)} for ${dur} min`,
+          ...(notes.trim() && { notes: notes.trim() }),
+        } as SleepActivity
+      })
+      onSave([sleepEntry, ...wakeEntries])
+    } else {
+      onSave(sleepEntry)
+    }
+    onClose()
   }
 
   return (
     <EntryModal title="Log Sleep" accent={accent} onClose={onClose} onSave={handleSave}>
-      {/* Period */}
-      <View style={styles.toggleRow}>
-        {(['Day', 'Night'] as const).map(p => (
-          <TouchableOpacity
-            key={p}
-            style={[
-              styles.toggleOpt,
-              dayPeriod === p && { backgroundColor: accent, borderColor: accent },
-            ]}
-            onPress={() => setDayPeriod(p)}
-          >
-            <Text style={dayPeriod === p ? styles.toggleTxtActive : styles.toggleTxt}>
-              {p}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Start & End */}
-      <View style={styles.timeRow}>
-        <View style={styles.sideContainer}>
-          <Text style={styles.fieldHeader}>Start</Text>
-          <TouchableOpacity style={styles.timeBox} onPress={() => setShowPickerFor('start')}>
-            <Text style={styles.timeInput}>{fmt(startTime)}</Text>
-          </TouchableOpacity>
+      <ScrollView>
+        {/* Period Toggle */}
+        <View style={styles.toggleRow}>
+          {(['Day', 'Night'] as Period[]).map(p => (
+            <TouchableOpacity
+              key={p}
+              style={[styles.toggleBtn, period === p && { backgroundColor: accent, borderColor: accent }]}
+              onPress={() => setPeriod(p)}>
+              <Text style={[styles.toggleTxt, period === p && styles.toggleTxtActive]}>{p}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        <View style={styles.sideContainer}>
-          <Text style={styles.fieldHeader}>End</Text>
-          <TouchableOpacity style={styles.timeBox} onPress={() => setShowPickerFor('end')}>
-            <Text style={styles.timeInput}>
-              {endTime ? fmt(endTime) : fmt(startTime)}
-            </Text>
-          </TouchableOpacity>
+        {/* Time Pickers */}
+        <View style={styles.timeRow}>
+          {(['Start', 'End'] as const).map(label => (
+            <View key={label} style={styles.timeContainer}>
+              <Text style={styles.label}>{label}</Text>
+              <TouchableOpacity
+                style={styles.timeBox}
+                onPress={() => setPicker({ type: label.toLowerCase() as 'start' | 'end' })}>
+                <Text style={styles.timeText}>
+                  {label === 'Start' ? fmtTime(startTime) : fmtTime(endTime || startTime)}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
-      </View>
-      {showPickerFor && (
-        <DateTimePicker
-          value={showPickerFor === 'start' ? startTime : endTime || new Date()}
-          mode="time"
-          display="default"
-          onChange={(_, dt) => {
-            setShowPickerFor(null)
-            if (!dt) return
-            showPickerFor === 'start' ? setStartTime(dt) : setEndTime(dt)
-          }}
-        />
-      )}
-
-      {/* Mood */}
-      <Text style={styles.fieldHeader}>Mood on Wake</Text>
-      <View style={styles.toggleRow}>
-        {(['Happy', 'Fussy'] as const).map(mv => (
-          <TouchableOpacity
-            key={mv}
-            style={[
-              styles.toggleOpt,
-              mood === mv && { backgroundColor: accent, borderColor: accent },
-            ]}
-            onPress={() => setMood(mv)}
-          >
-            <Ionicons
-              name={mv === 'Happy' ? 'happy-outline' : 'sad-outline'}
-              size={22}
-              color={mood === mv ? '#fff' : colors.textSecondary}
+        {/* Picker */}
+        {picker && (
+          <DateTimePicker
+            value={picker.type === 'start' ? startTime : endTime || new Date()}
+            mode="time"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={onChange}
+          />
+        )}
+        {/* Interruptions */}
+        <Text style={styles.sectionHeader}>Sleep Interruptions</Text>
+        {interruptions.map((intr, idx) => (
+          <View key={idx} style={styles.interruptionRow}>
+            <TouchableOpacity
+              style={styles.timeBox}
+              onPress={() => setPicker({ type: 'interruption', index: idx })}>
+              <Text style={styles.timeText}>{fmtTime(intr.start)}</Text>
+            </TouchableOpacity>
+            <TextInput
+              style={[styles.input, styles.durationInput]}
+              keyboardType="numeric"
+              value={intr.duration}
+              onChangeText={v => setInterruptions(prev => prev.map((x,i)=>i===idx?{...x,duration:v}:x))}
+              placeholder="min"
             />
-          </TouchableOpacity>
+          </View>
         ))}
-      </View>
-
-      {/* Notes */}
-      <Text style={styles.fieldHeader}>Notes</Text>
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        multiline
-        placeholder="(e.g., mood)"
-        placeholderTextColor={colors.textSecondary}
-        value={notes}
-        onChangeText={setNotes}
-      />
+        <TouchableOpacity onPress={addInterruption}>
+          <Text style={[styles.addLink, { color: accent }]}>+ Add Interruption</Text>
+        </TouchableOpacity>
+        {/* Mood */}
+        <Text style={styles.sectionHeader}>Mood on Wake</Text>
+        <View style={styles.toggleRow}>
+          {(['Happy', 'Fussy'] as Mood[]).map(mv => (
+            <TouchableOpacity
+              key={mv}
+              style={[styles.toggleBtn, mood === mv && { backgroundColor: accent, borderColor: accent }]}
+              onPress={() => setMood(mood === mv ? '' : mv)}>
+              <Ionicons
+                name={mv === 'Happy' ? 'happy-outline' : 'sad-outline'}
+                size={24}
+                color={mood === mv ? '#fff' : colors.textSecondary}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Notes */}
+        <Text style={styles.sectionHeader}>Notes</Text>
+        <TextInput
+          style={[styles.input, styles.notesInput]}
+          multiline
+          placeholder="(e.g., baby stirred once)"
+          value={notes}
+          onChangeText={setNotes}
+        />
+      </ScrollView>
     </EntryModal>
   )
 }
 
 const styles = StyleSheet.create({
-  toggleRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.lg,
-  },
-  toggleOpt: {
+  toggleRow: { flexDirection: 'row', marginVertical: spacing.md },
+  toggleBtn: {
     flex: 1,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    alignItems: 'center',
     marginHorizontal: 4,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    alignItems: 'center',
   },
-  toggleTxt: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  toggleTxtActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  fieldHeader: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 12,
-    color: colors.textPrimary,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  sideContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  toggleTxt: { fontSize: 14, color: colors.textSecondary },
+  toggleTxtActive: { color: '#fff', fontWeight: '600' },
+  timeRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md },
+  timeContainer: { flex: 1, alignItems: 'center' },
+  label: { fontSize: 14, fontWeight: '500', color: colors.textPrimary },
   timeBox: {
-    padding: spacing.lg,
+    marginTop: 4,
+    padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
-    marginTop: 4,
+    minWidth: 80,
     alignItems: 'center',
   },
-  timeInput: {
-    fontSize: 16,
-    color: colors.textPrimary,
-  },
+  timeText: { fontSize: 16, color: colors.textPrimary },
+  sectionHeader: { fontSize: 14, fontWeight: '500', marginTop: spacing.md, color: colors.textPrimary },
+  interruptionRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 8,
-    padding: 8,
+    padding: spacing.sm,
     color: colors.textPrimary,
+    marginLeft: spacing.sm,
   },
+  durationInput: { width: 60 },
+  addLink: { marginTop: spacing.sm, fontWeight: '500' },
+  notesInput: { height: 80, textAlignVertical: 'top' },
 })
