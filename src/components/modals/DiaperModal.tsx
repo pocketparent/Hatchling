@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { EntryModal } from './EntryModal'
-import { DiaperActivity, activityColorMap } from '../../screens/TodayView/types'
+import { DiaperActivity, activityColorMap } from '../../models/types'
 import { colors } from '../../theme/colors'
 import { Button } from '../common/Button'
 import { spacing } from '../../theme/spacing'

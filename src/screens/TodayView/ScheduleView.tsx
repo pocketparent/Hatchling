@@ -3,7 +3,7 @@ import { SectionList, StyleSheet, View, Text } from 'react-native';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
-import { ScheduleSection, mockSchedule } from './types';
+import { ScheduleSection, mockSchedule } from '../../models/types';
 
 export default function ScheduleView() {
   let napCount = 0;

@@ -1,7 +1,7 @@
 // src/screens/TodayView/TimelineScreen.tsx
 import React, { useState, useCallback } from 'react';
 import TimelineView, { TimelineViewProps } from './TimelineView';
-import { Activity, ActivityType } from './types';
+import { Activity, ActivityType } from '../../models/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchTodaysActivities } from '../../services/activityService'; 
 // ← replace with however you actually load your data

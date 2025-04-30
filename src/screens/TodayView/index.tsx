@@ -14,7 +14,7 @@ import { NLInputBar } from '../../components/common/NLInputBar';
 import TimelineView from './TimelineView';
 import ScheduleView from './ScheduleView';
 import CardView from './CardView';
-import { Activity, ActivityType, mockActivities } from './types';
+import { Activity, ActivityType, mockActivities } from '../../models/types';
 
 const quickActions: {
   type: Exclude<ActivityType, 'health'>;

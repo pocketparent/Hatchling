@@ -1,7 +1,7 @@
 // src/services/firestore.ts
 import { db } from '../config/firebase'
 import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'
-import { Activity } from '../screens/TodayView/types'
+import { Activity } from '../models/types'
 
 const entriesCollection = collection(db, 'entries')
 

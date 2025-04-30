@@ -13,7 +13,7 @@ import {
   DiaperActivity,
   activityIconMap,
   activityColorMap,
-} from '../screens/TodayView/types';
+} from '../models/types';
 import { colors } from '../theme/colors';
 import { formatTime } from '../utils/timeUtils';
 

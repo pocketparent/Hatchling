@@ -19,7 +19,7 @@ import {
   BottleFeedingActivity,
   SolidsFeedingActivity,
   activityColorMap,
-} from '../../screens/TodayView/types'
+} from '../../models/types'
 
 // Supported feeding modes
 type Mode = 'breast' | 'bottle' | 'solids'

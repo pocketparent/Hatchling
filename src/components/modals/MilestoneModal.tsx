@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { MilestoneActivity, activityColorMap } from '../../screens/TodayView/types'
+import { MilestoneActivity, activityColorMap } from '../../models/types'
 import { EntryModal } from './EntryModal'
 import { colors } from '../../theme/colors'
 

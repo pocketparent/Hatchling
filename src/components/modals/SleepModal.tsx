@@ -12,10 +12,10 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
 import { EntryModal } from './EntryModal'
-import { activityColorMap } from '../../screens/TodayView/types'
+import { activityColorMap } from '../../models/types'
 import { colors } from '../../theme/colors'
 import { spacing } from '../../theme/spacing'
-import { SleepActivity } from '../../screens/TodayView/types'
+import { SleepActivity } from '../../models/types'
 
 type Period = 'Day' | 'Night'
 type Mood = 'Happy' | 'Fussy' | ''

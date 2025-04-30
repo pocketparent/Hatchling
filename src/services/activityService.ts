@@ -1,5 +1,5 @@
 // src/services/activityService.ts
-import { Activity } from '../screens/TodayView/types'
+import { Activity } from '../models/types'
 import { db } from '../config/firebase'   // your Firebase export
 import {
   collection,

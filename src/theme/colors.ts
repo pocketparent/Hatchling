@@ -1,6 +1,6 @@
 // File: src/theme/colors.ts
 import { MilestoneModal } from 'src/components/modals/MilestoneModal';
-import { ActivityType } from '../screens/TodayView/types';
+import { ActivityType } from '../models/types';
 
 export const colors = {
   background:      '#F7F5F2',

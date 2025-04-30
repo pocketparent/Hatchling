@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { auth } from '../config/firebase'
 import { listenToEntries } from '../services/firestore'
-import { Activity } from '../screens/TodayView/types'
+import { Activity } from '../models/types'
 
 export function useActivities() {
   const [activities, setActivities] = useState<Activity[]>([])

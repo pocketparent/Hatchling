@@ -23,7 +23,7 @@ import {
 } from 'firebase/firestore'
 import { db, auth } from '../../config/firebase'
 
-import { Activity, ActivityType, activityColorMap } from './types'
+import { Activity, ActivityType, activityColorMap } from '../../models/types'
 import { NLInputBar } from '../../components/common/NLInputBar'
 import { Fab } from '../../components/common/Fab'
 import { SleepModal } from '../../components/modals/SleepModal'
