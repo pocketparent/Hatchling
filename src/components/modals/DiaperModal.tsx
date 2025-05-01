@@ -1,5 +1,5 @@
 // File: src/components/modals/DiaperModal.tsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,57 +8,84 @@ import {
   TextInput,
   StyleSheet,
   Platform,
-} from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import { EntryModal } from './EntryModal'
-import { DiaperActivity, activityColorMap } from '../../models/types'
-import { colors } from '../../theme/colors'
-import { Button } from '../common/Button'
-import { spacing } from '../../theme/spacing'
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { EntryModal } from './EntryModal/index';
+import { DiaperActivity } from '../../models/types';
+import { activityColorMap } from '../../constants/activityConfig';
+import { colors } from '../../theme/colors';
+import { spacing } from '../../theme/spacing';
 
-type DiaperType = 'wet' | 'dirty' | 'dry'
+type DiaperType = 'wet' | 'dirty' | 'dry';
 
-export const DiaperModal: React.FC<{ onClose: () => void; onSave: (entry: DiaperActivity) => void }> = ({ onClose, onSave }) => {
-  const accent = activityColorMap.diaper
+interface DiaperModalProps {
+  initialEntry?: DiaperActivity;
+  onClose: () => void;
+  onSave: (entry: DiaperActivity) => void;
+}
 
-  // State
-  const [selectedType, setSelectedType] = useState<DiaperType | ''>('')
-  const [diarrhea, setDiarrhea] = useState(false)
-  const [rash, setRash] = useState(false)
-  const [time, setTime] = useState<Date>(new Date())
-  const [showPicker, setShowPicker] = useState(false)
-  const [notes, setNotes] = useState('')
+// Map lowercase UI types to Firestore enum
+const STATUS_MAP: Record<DiaperType, 'Wet' | 'Dirty' | 'Dry'> = {
+  wet: 'Wet',
+  dirty: 'Dirty',
+  dry: 'Dry',
+};
 
-  // Validation: status must be selected
-  const canSave = selectedType !== ''
+export const DiaperModal: React.FC<DiaperModalProps> = ({
+  initialEntry,
+  onClose,
+  onSave,
+}) => {
+  const accent = activityColorMap.diaper;
 
-  // Reset diarrhea if type changes away from 'dirty'
+  // State seeded from initialEntry or defaults
+  const [selectedType, setSelectedType] = useState<DiaperType | ''>(
+    initialEntry?.status ? (initialEntry.status.toLowerCase() as DiaperType) : ''
+  );
+  const [diarrhea, setDiarrhea] = useState(initialEntry?.diarrhea || false);
+  const [rash, setRash] = useState(initialEntry?.rash || false);
+  const [time, setTime] = useState<Date>(
+    initialEntry ? new Date(initialEntry.createdAt) : new Date()
+  );
+  const [showPicker, setShowPicker] = useState(false);
+  const [notes, setNotes] = useState(initialEntry?.notes || '');
+
+  const canSave = selectedType !== '';
+
+  // Clear diarrhea when switching away from 'dirty'
   useEffect(() => {
     if (selectedType !== 'dirty') {
-      setDiarrhea(false)
+      setDiarrhea(false);
     }
-  }, [selectedType])
+  }, [selectedType]);
 
-  const formattedTime = time.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
+  const formattedTime = time.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: 'numeric',
+  });
 
   const handleSave = () => {
-    if (!canSave) return
+    if (!canSave) return;
     const entry: DiaperActivity = {
-      id: Date.now().toString(),
+      id: initialEntry?.id || '',
       type: 'diaper',
-      title: `Diaper: ${selectedType}${selectedType === 'dirty' && diarrhea ? ' (diarrhea)' : ''}`,
-      createdAt: time.toISOString(),
+      title: `Diaper: ${
+        selectedType.charAt(0).toUpperCase() + selectedType.slice(1)
+      }${selectedType === 'dirty' && diarrhea ? ' (diarrhea)' : ''}`,
+      createdAt: initialEntry?.createdAt || time.toISOString(),
+      status: STATUS_MAP[selectedType as DiaperType],
       rash: rash || undefined,
+      diarrhea: selectedType === 'dirty' ? diarrhea || undefined : undefined,
       notes: notes.trim() || undefined,
-    }
-    onSave(entry)
-  }
+    };
+    onSave(entry);
+  };
 
   const onChange = (_: any, dt?: Date) => {
-    setShowPicker(false)
-    if (!dt) return
-    setTime(dt > new Date() ? new Date() : dt)
-  }
+    setShowPicker(false);
+    if (!dt) return;
+    setTime(dt > new Date() ? new Date() : dt);
+  };
 
   return (
     <EntryModal
@@ -73,11 +100,22 @@ export const DiaperModal: React.FC<{ onClose: () => void; onSave: (entry: Diaper
             key={type}
             style={[
               styles.toggleOpt,
-              selectedType === type && { backgroundColor: accent, borderColor: accent },
+              selectedType === type && {
+                backgroundColor: accent,
+                borderColor: accent,
+              },
             ]}
-            onPress={() => setSelectedType(prev => (prev === type ? '' : type))}
+            onPress={() =>
+              setSelectedType(prev => (prev === type ? '' : type))
+            }
           >
-            <Text style={selectedType === type ? styles.toggleTxtActive : styles.toggleTxt}>
+            <Text
+              style={
+                selectedType === type
+                  ? styles.toggleTxtActive
+                  : styles.toggleTxt
+              }
+            >
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -107,7 +145,10 @@ export const DiaperModal: React.FC<{ onClose: () => void; onSave: (entry: Diaper
       </View>
 
       <Text style={styles.fieldHeader}>Time</Text>
-      <TouchableOpacity style={styles.pickerBox} onPress={() => setShowPicker(true)}>
+      <TouchableOpacity
+        style={styles.pickerBox}
+        onPress={() => setShowPicker(true)}
+      >
         <Text style={styles.pickerText}>{formattedTime}</Text>
       </TouchableOpacity>
       {showPicker && (
@@ -129,8 +170,8 @@ export const DiaperModal: React.FC<{ onClose: () => void; onSave: (entry: Diaper
         onChangeText={setNotes}
       />
     </EntryModal>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   typeSelector: {
@@ -191,4 +232,4 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: spacing.md,
   },
-})
+});

@@ -1,5 +1,5 @@
-// src/screens/Onboarding/TourScreen.tsx
-import React, { useState } from 'react';
+// File: src/screens/Onboarding/TourScreen.tsx
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -9,44 +9,48 @@ import {
   TouchableOpacity,
   NativeSyntheticEvent,
   NativeScrollEvent,
-} from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { OnboardingParamList }    from '../../navigation/OnboardingNavigator';
-import { ScreenContainer }        from '../../components/layout/ScreenContainer';
-import { colors }                 from '../../theme/colors';
-import { spacing }                from '../../theme/spacing';
-import { typography }             from '../../theme/typography';
-import { doc, updateDoc }         from 'firebase/firestore'
-import { db, auth }               from '../../config/firebase'
+} from 'react-native'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { OnboardingParamList } from '../../navigation/OnboardingNavigator'
+import { ScreenContainer } from '../../components/layout/ScreenContainer'
+import { colors } from '../../theme/colors'
+import { spacing } from '../../theme/spacing'
+import { typography } from '../../theme/typography'
+import { doc, updateDoc, setDoc } from 'firebase/firestore'
+import { db, auth } from '../../config/firebase'
 
-type Props = NativeStackScreenProps<OnboardingParamList, 'Tour'>;
+type Props = NativeStackScreenProps<OnboardingParamList, 'Tour'>
 
 export default function TourScreen({ navigation }: Props) {
   const slides = [
-    { key: '1', title: 'Track with Ease',     description: 'Log sleep, feeding, and diapers in just a tap.' },
-    { key: '2', title: 'Get Smart Insights',  description: 'AI-powered tips to help your baby thrive.' },
-    { key: '3', title: 'Stay in Sync',        description: 'Share updates with caregivers instantly.' },
-  ];
+    { key: '1', title: 'Track with Ease', description: 'Log sleep, feeding, and diapers in just a tap.' },
+    { key: '2', title: 'Get Smart Insights', description: 'AI-powered tips to help your baby thrive.' },
+    { key: '3', title: 'Stay in Sync', description: 'Share updates with caregivers instantly.' },
+  ]
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const { width } = Dimensions.get('window');
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const { width } = Dimensions.get('window')
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const idx = Math.round(e.nativeEvent.contentOffset.x / width);
-    setCurrentIndex(idx);
-  };
+    const idx = Math.round(e.nativeEvent.contentOffset.x / width)
+    setCurrentIndex(idx)
+  }
 
   const handleGetStarted = async () => {
-    // Exit onboarding and load the Main tabs
-    navigation.getParent()?.navigate('Main');
-    
     const user = auth.currentUser
     if (user) {
-      await updateDoc(doc(db, 'users', user.uid), { onboarded: true })
-      console.log('✔️ onboarded flag set')
+      const userRef = doc(db, 'users', user.uid)
+      try {
+        await updateDoc(userRef, { onboarded: true })
+      } catch (err) {
+        await setDoc(userRef, { onboarded: true }, { merge: true })
+      }
     }
-    
-  };
+    navigation.getParent()?.reset({
+      index: 0,
+      routes: [{ name: 'Main' }],
+    })
+  }
 
   return (
     <ScreenContainer>
@@ -83,7 +87,7 @@ export default function TourScreen({ navigation }: Props) {
         ))}
       </View>
     </ScreenContainer>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -135,4 +139,4 @@ const styles = StyleSheet.create({
   dotInactive: {
     backgroundColor: colors.border,
   },
-});
+})

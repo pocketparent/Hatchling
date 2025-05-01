@@ -6,8 +6,11 @@ import { Button }          from '../../components/common/Button';
 import { spacing }         from '../../theme/spacing';
 import { typography }      from '../../theme/typography';
 
-export default function WelcomeScreen({ navigation }) {
-  return (
+interface Props {
+navigation: any; // you can replace `any` with your actual NavigationProp<RootStackParamList, 'Welcome'>
+}
+export default function WelcomeScreen({ navigation }: Props) {  
+return (
     <ScreenContainer>
       <View style={styles.inner}>
         {/* Optional logo */}

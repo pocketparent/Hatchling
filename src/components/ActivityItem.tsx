@@ -1,94 +1,121 @@
-import React from 'react';
+// File: src/components/ActivityItem.tsx
+import React from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import {
   Activity,
   SleepActivity,
   FeedingActivity,
   DiaperActivity,
+  MilestoneActivity,
+  HealthActivity,
+} from '../models/types'
+import {
   activityIconMap,
   activityColorMap,
-} from '../models/types';
-import { colors } from '../theme/colors';
-import { formatTime } from '../utils/timeUtils';
+} from '../constants/activityConfig'
+import { colors } from '../theme/colors'
+import { formatTime } from '../utils/timeUtils'
 
 interface Props {
-  activity: Activity;
-  onPress: (activity: Activity) => void;
+  activity: Activity
+  onPress: (activity: Activity) => void
 }
 
 export const ActivityItem: React.FC<Props> = ({ activity, onPress }) => {
-  let detail = '';
-  let timeLabel = formatTime(activity.createdAt);
-  let displayTitle = activity.title;
+  // Default label and detail
+  let displayTitle = ''
+  let detail = ''
+  // Derive start and end times (for sleep) or fallback to createdAt
+  let start = ''
+  let end = ''
 
   switch (activity.type) {
     case 'sleep': {
-      const sa = activity as SleepActivity;
-      displayTitle = sa.period === 'night' ? 'Nighttime Sleep' : 'Nap';
-      timeLabel = `${formatTime(sa.start)} - ${formatTime(sa.end)}`;
-      const startMs = sa.start ? new Date(sa.start).getTime() : NaN;
-      const endMs = sa.end ? new Date(sa.end).getTime() : NaN;
-      const durationMin = !isNaN(startMs) && !isNaN(endMs)
-        ? Math.round((endMs - startMs) / 60000)
-        : 0;
-      const interrupts = sa.interruptions?.length || 0;
-      const moodText = sa.mood ? ` | Woke ${sa.mood}` : '';
-      detail = `${durationMin}m | Awoke ${interrupts}x${moodText}`;
-      break;
+      const sa = activity as SleepActivity
+      displayTitle = 'Sleep'
+      start = formatTime(sa.start)
+      end = formatTime(sa.end)
+      const startDate = new Date(sa.start)
+      const endDate = new Date(sa.end)
+      const durationMin = Math.round((endDate.getTime() - startDate.getTime()) / 60000)
+      const interrupts = sa.interruptions?.length ?? 0
+      const moodText = sa.mood ? ` | Mood: ${sa.mood}` : ''
+      detail = `${durationMin}m | Wake Ups: ${interrupts}${moodText}`
+      break
     }
     case 'feeding': {
-      const fa = activity as FeedingActivity;
-      displayTitle = 'Feeding';
-      timeLabel = formatTime(fa.createdAt);
-      const parts: string[] = [];
-      if (fa.mode === 'bottle') parts.push(`Bottle (${fa.amount}${fa.unit || 'oz'})`);
-      else if (fa.mode === 'breast') {
-        const s = fa.start ? new Date(fa.start).getTime() : NaN;
-        const e = fa.end ? new Date(fa.end).getTime() : NaN;
-        const d = !isNaN(s) && !isNaN(e) ? Math.round((e - s) / 60000) : 0;
-        parts.push(`Breast (${d}m)`);
+      const fa = activity as FeedingActivity
+      displayTitle = 'Feeding'
+      start = formatTime(fa.createdAt)
+      // no end for feeding
+      if (fa.mode === 'bottle') {
+        const amount = fa.amount ?? 0
+        detail = `Bottle: ${amount}${fa.unit ?? 'oz'}`
+      } else if (fa.mode === 'breast') {
+        const s = new Date(fa.start)
+        const e = new Date(fa.end)
+        const dur = Math.round((e.getTime() - s.getTime()) / 60000)
+        detail = `Breast: ${dur}m | Side: ${fa.side}`
       } else if (fa.mode === 'solids') {
-        parts.push('Solids');
+        const desc = fa.amountDesc || ''
+        const reaction = fa.reaction || ''
+        detail = `Solids${desc ? `: ${desc}` : ''}${reaction ? ` | ${reaction}` : ''}`
       }
-      detail = parts.join(' | ');
-      break;
+      break
     }
     case 'diaper': {
-      const da = activity as DiaperActivity;
-      displayTitle = 'Diaper';
-      timeLabel = formatTime(da.createdAt);
-      const parts: string[] = [];
-      if (da.status) parts.push(da.status);
-      if (da.rash) parts.push('Rash');
-      if (da.diarrhea) parts.push('Diarrhea');
-      detail = parts.join(' | ');
-      break;
+      const da = activity as DiaperActivity
+      displayTitle = 'Diaper'
+      start = formatTime(da.createdAt)
+      const parts: string[] = []
+      if (da.status) parts.push(da.status)
+      if (da.rash) parts.push('Rash')
+      if (da.diarrhea) parts.push('Diarrhea')
+      detail = parts.join(' | ')
+      break
     }
-    case 'milestone':
-      displayTitle = activity.title;
-      detail = (activity as any).notes || '';
-      break;
-    case 'health':
-      displayTitle = activity.title;
-      detail = (activity as any).details || '';
-      break;
+    case 'milestone': {
+      const me = activity as MilestoneActivity
+      displayTitle = 'Milestone'
+      start = formatTime(me.createdAt)
+      detail = me.notes || ''
+      break
+    }
+    case 'health': {
+      const he = activity as HealthActivity
+      displayTitle = 'Health'
+      start = formatTime(he.createdAt)
+      detail = he.details || ''
+      break
+    }
+    default: {
+      const t = (activity as Activity).type
+      displayTitle = t.charAt(0).toUpperCase() + t.slice(1)
+      start = formatTime((activity as Activity).createdAt)
+      break
+    }
   }
 
+  // Build timeLabel: two lines if both start and end
+  const timeLabel = end
+    ? `${start} -\n${end}`
+    : `${start}`
+
   return (
-    <TouchableOpacity onPress={() => onPress(activity)} style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={() => onPress(activity)}>
       <View style={styles.left}>
         <Ionicons
           name={activityIconMap[activity.type]}
           size={20}
           color={activityColorMap[activity.type]}
         />
-        <View style={styles.leftText}>
+        <View style={styles.textContainer}>
           <Text style={styles.title}>{displayTitle}</Text>
           {!!detail && <Text style={styles.detail}>{detail}</Text>}
         </View>
@@ -97,15 +124,15 @@ export const ActivityItem: React.FC<Props> = ({ activity, onPress }) => {
         <Text style={styles.time}>{timeLabel}</Text>
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+    padding: 12,
     marginBottom: 8,
     backgroundColor: colors.card,
     borderRadius: 8,
@@ -115,10 +142,30 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  left: { flexDirection: 'row', alignItems: 'center', maxWidth: '70%' },
-  leftText: { marginLeft: 8 },
-  title: { fontSize: 16, color: colors.textPrimary, flexShrink: 1 },
-  detail: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
-  right: { alignItems: 'flex-end', maxWidth: '40%' },
-  time: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
-});
+  left: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: '70%',
+  },
+  textContainer: {
+    marginLeft: 8,
+  },
+  title: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    flexShrink: 1,
+  },
+  detail: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  right: {
+    alignItems: 'flex-end',
+    maxWidth: '40%',
+  },
+  time: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+})

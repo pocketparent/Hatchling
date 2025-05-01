@@ -1,5 +1,4 @@
 // File: src/components/modals/MilestoneModal.tsx
-
 import React, { useState, useEffect } from 'react'
 import {
   View,
@@ -7,13 +6,16 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { MilestoneActivity, activityColorMap } from '../../models/types'
 import { EntryModal } from './EntryModal'
+import { MilestoneActivity } from '../../models/types'
+import { activityColorMap } from '../../constants/activityConfig'
 import { colors } from '../../theme/colors'
 
 interface MilestoneModalProps {
+  /** If provided, seeds the form for editing */
   initialEntry?: MilestoneActivity
   onClose: () => void
   onSave: (entry: MilestoneActivity) => void
@@ -26,7 +28,7 @@ export const MilestoneModal: React.FC<MilestoneModalProps> = ({
 }) => {
   const accent = activityColorMap.milestone
 
-  // Seed from initialEntry
+  // Seed form state from initialEntry (if editing)
   const [milestone, setMilestone] = useState(initialEntry?.title ?? '')
   const [date, setDate] = useState<Date>(
     initialEntry ? new Date(initialEntry.createdAt) : new Date()
@@ -34,28 +36,36 @@ export const MilestoneModal: React.FC<MilestoneModalProps> = ({
   const [showPicker, setShowPicker] = useState(false)
   const [notes, setNotes] = useState(initialEntry?.notes ?? '')
 
+  // Re-seed if initialEntry changes
   useEffect(() => {
-    if (!initialEntry) return
-    setMilestone(initialEntry.title)
-    setDate(new Date(initialEntry.createdAt))
-    setNotes(initialEntry.notes ?? '')
+    if (initialEntry) {
+      setMilestone(initialEntry.title)
+      setDate(new Date(initialEntry.createdAt))
+      setNotes(initialEntry.notes ?? '')
+    }
   }, [initialEntry])
 
   const formattedDate = date.toLocaleDateString()
 
   const handleSave = () => {
+    // Build the entry, preserving id on edit
     const entry: MilestoneActivity = {
       id: initialEntry?.id ?? '',
       type: 'milestone',
-      title: milestone || 'Milestone',
+      title: milestone.trim() || 'Milestone',
       createdAt: date.toISOString(),
-      notes: notes || undefined,
+      notes: notes.trim() || undefined,
     }
     onSave(entry)
   }
 
   return (
-    <EntryModal title="Log Milestone" accent={accent} onClose={onClose} onSave={handleSave}>
+    <EntryModal
+      title="Log Milestone"
+      accent={accent}
+      onClose={onClose}
+      onSave={handleSave}
+    >
       <Text style={styles.fieldHeader}>Milestone</Text>
       <TextInput
         style={styles.input}
@@ -65,14 +75,17 @@ export const MilestoneModal: React.FC<MilestoneModalProps> = ({
       />
 
       <Text style={styles.fieldHeader}>Date</Text>
-      <TouchableOpacity style={styles.pickerBox} onPress={() => setShowPicker(true)}>
+      <TouchableOpacity
+        style={styles.pickerBox}
+        onPress={() => setShowPicker(true)}
+      >
         <Text style={styles.pickerText}>{formattedDate}</Text>
       </TouchableOpacity>
       {showPicker && (
         <DateTimePicker
           value={date}
           mode="date"
-          display="default"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={(_, d) => {
             setShowPicker(false)
             if (d) setDate(d)

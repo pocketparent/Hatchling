@@ -1,5 +1,5 @@
-// src/TodayView/index.tsx
-import React, { useState, useRef } from 'react';
+// File: src/TodayView/index.tsx
+import React, { useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -7,82 +7,58 @@ import {
   StyleSheet,
   Modal,
   Button,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { NLInputBar } from '../../components/common/NLInputBar';
-import TimelineView from './TimelineView';
-import ScheduleView from './ScheduleView';
-import CardView from './CardView';
-import { Activity, ActivityType, mockActivities } from '../../models/types';
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { ScreenContainer } from '../../components/layout/ScreenContainer'
+import TimelineView from './TimelineView'
+import ScheduleView from './ScheduleView'
+import { ActivityType } from '../../models/types'
 
 const quickActions: {
-  type: Exclude<ActivityType, 'health'>;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  label: string;
+  type: Exclude<ActivityType, 'health'>
+  icon: keyof typeof Ionicons.glyphMap
+  color: string
+  label: string
 }[] = [
   { type: 'sleep', icon: 'moon', color: '#D8D3E8', label: 'Sleep' },
   { type: 'feeding', icon: 'restaurant', color: '#E8DFD1', label: 'Feed' },
   { type: 'diaper', icon: 'water', color: '#D8E5E2', label: 'Diaper' },
   { type: 'milestone', icon: 'trophy', color: '#7D7A89', label: 'Milestone' },
-];
+]
 
 export default function TodayView() {
-  const [view, setView] = useState<'Activity Log' | 'Schedule' | 'Highlights'>(
-    'Activity Log'
-  );
-  const [activities, setActivities] = useState<Activity[]>(mockActivities);
-  const [refreshing, setRefreshing] = useState(false);
-  const [modalType, setModalType] = useState<
-    Exclude<ActivityType, 'health'> | null
-  >(null);
-  const [fabOpen, setFabOpen] = useState(false);
+  const [view, setView] = useState<'Activity Log' | 'Schedule'>('Activity Log')
+  const [modalType, setModalType] = useState<Exclude<ActivityType, 'health'> | null>(null)
+  const [fabOpen, setFabOpen] = useState(false)
   const [activeTimer, setActiveTimer] = useState<{
-    type: 'sleep' | 'feeding';
-    start: Date;
-  } | null>(null);
-  const timerRef = useRef<NodeJS.Timeout>();
+    type: 'sleep' | 'feeding'
+    start: Date
+  } | null>(null)
+  const timerRef = useRef<NodeJS.Timeout>()
 
   const openModal = (type: Exclude<ActivityType, 'health'>) => {
-    setModalType(type);
-    setFabOpen(false);
-  };
+    setModalType(type)
+    setFabOpen(false)
+  }
   const closeModal = () => {
-    setModalType(null);
-  };
+    setModalType(null)
+  }
 
   const startTimer = (type: 'sleep' | 'feeding') => {
-    if (activeTimer) return;
-    setActiveTimer({ type, start: new Date() });
+    if (activeTimer) return
+    setActiveTimer({ type, start: new Date() })
     // scheduleNotification...
-  };
+  }
   const stopTimer = () => {
-    clearInterval(timerRef.current!);
-    setActiveTimer(null);
-  };
+    clearInterval(timerRef.current!)
+    setActiveTimer(null)
+  }
 
-  let Content: JSX.Element;
+  let Content: JSX.Element
   if (view === 'Activity Log') {
-    Content = (
-      <TimelineView
-        activities={activities}
-        refreshing={refreshing}
-        onRefresh={() => {}}
-        onItemPress={() => {}}
-      />
-    );
-  } else if (view === 'Schedule') {
-    Content = <ScheduleView />;
+    Content = <TimelineView />
   } else {
-    Content = (
-      <CardView
-        activities={activities}
-        refreshing={refreshing}
-        onRefresh={() => {}}
-        onItemPress={() => {}}
-      />
-    );
+    Content = <ScheduleView />
   }
 
   return (
@@ -98,15 +74,13 @@ export default function TodayView() {
       </View>
 
       <View style={styles.tabs}>
-        {(['Activity Log', 'Schedule', 'Highlights'] as const).map((v) => (
+        {(['Activity Log', 'Schedule'] as const).map((v) => (
           <TouchableOpacity
             key={v}
             onPress={() => setView(v)}
             style={view === v ? styles.tabActive : styles.tab}
           >
-            <Text
-              style={view === v ? styles.tabTextActive : styles.tabText}
-            >
+            <Text style={view === v ? styles.tabTextActive : styles.tabText}>
               {v}
             </Text>
           </TouchableOpacity>
@@ -116,7 +90,7 @@ export default function TodayView() {
       <View style={styles.content}>{Content}</View>
 
       {/* FAB + quick actions */}
-      {/* ... */}
+      {/* ... existing FAB code unchanged ... */}
 
       {modalType && (
         <Modal transparent animationType="slide">
@@ -129,7 +103,7 @@ export default function TodayView() {
         </Modal>
       )}
     </ScreenContainer>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -176,4 +150,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
   },
-});
+})
