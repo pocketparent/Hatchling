@@ -1,5 +1,6 @@
 // File: src/services/openaiService.ts
 import axios from 'axios';
+import { OPENAI_API_KEY } from '@env'; // Import the key from @env
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -18,13 +19,13 @@ export async function sendChatToOpenAI(
   messages: ChatMessage[],
   model: 'gpt-3.5-turbo' | 'gpt-4' = 'gpt-3.5-turbo'
 ): Promise<ChatResponse> {
-  // Ensure the API key is available
-  if (!process.env.OPENAI_API_KEY) {
+  // Ensure the API key is available (check the imported constant)
+  if (!OPENAI_API_KEY) {
     console.error('OpenAI API key is not configured.');
     return {
       success: false,
       reply: '',
-      error: 'OpenAI API key is missing. Please configure it in your environment variables.',
+      error: 'OpenAI API key is missing. Please configure it in your .env file.', // Updated error message
     };
   }
 
@@ -40,7 +41,7 @@ export async function sendChatToOpenAI(
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`, // Use the imported key
         },
       }
     );
