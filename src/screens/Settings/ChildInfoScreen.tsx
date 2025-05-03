@@ -1,5 +1,5 @@
 // File: src/screens/Settings/ChildInfoScreen.tsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,68 +9,87 @@ import {
   StyleSheet,
   Platform,
   TouchableOpacity,
-} from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import { useNavigation } from '@react-navigation/native'
-import { useSettings } from '../../hooks/useSettings'
-import { colors } from '../../theme/colors'
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useNavigation } from '@react-navigation/native';
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
+import { useSettings } from '../../hooks/useSettings';
+import { colors } from '../../theme/colors';
+import { UserSettings } from '../../models/types'; // Import UserSettings type
 
-const sexOptions: Array<'boy' | 'girl' | 'other'> = ['boy', 'girl', 'other']
+// Standardized sex options based on user confirmation and types.ts
+const sexOptions: Array<'boy' | 'girl' | 'none'> = ['boy', 'girl', 'none'];
 
 export default function ChildInfoScreen() {
-  const navigation = useNavigation()
-  const { settings, loading, error, save } = useSettings()
-  const [firstName, setFirstName] = useState('')
-  const [dob, setDob] = useState(new Date())
-  const [showPicker, setShowPicker] = useState(false)
-  const [sex, setSex] = useState<'boy' | 'girl' | 'other'>('other')
-  const [saving, setSaving] = useState(false)
+  const navigation = useNavigation();
+  const { settings, loading, error, save } = useSettings();
+  const [firstName, setFirstName] = useState('');
+  const [dob, setDob] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+  const [sex, setSex] = useState<'boy' | 'girl' | 'none'>('none'); // Updated type
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (settings) {
-      setFirstName(settings.childFirstName)
-      if (settings.childDOB) {
-        setDob(new Date(settings.childDOB))
+      setFirstName(settings.childFirstName || ''); // Handle potentially undefined
+      // Convert Firestore Timestamp to JS Date
+      if (settings.childDOB && settings.childDOB instanceof Timestamp) {
+        setDob(settings.childDOB.toDate());
+      } else if (typeof settings.childDOB === 'string') {
+        // Fallback for potentially old string format (should be removed later)
+        const parsedDate = new Date(settings.childDOB);
+        if (!isNaN(parsedDate.getTime())) {
+          setDob(parsedDate);
+        }
       }
-      setSex(settings.childSex)
+      // Ensure sex is one of the valid options
+      setSex(sexOptions.includes(settings.childSex as any) ? settings.childSex : 'none');
     }
-  }, [settings])
+  }, [settings]);
 
   // Show loading state
-  if (loading || !settings) {
+  if (loading) { // Simplified loading check
     return (
       <View style={styles.center}>
         <ActivityIndicator />
       </View>
-    )
+    );
   }
 
   if (error) {
     return (
       <View style={styles.container}>
-        <Text style={styles.error}>Error: {error}</Text>
+        <Text style={styles.error}>Error loading settings: {error}</Text>
       </View>
-    )
+    );
   }
 
   const onChangeDate = (_: any, selected?: Date) => {
-    setShowPicker(Platform.OS === 'ios')
+    setShowPicker(Platform.OS === 'ios');
     if (selected) {
-      setDob(selected)
+      setDob(selected);
     }
-  }
+  };
 
   const handleSave = async () => {
-    setSaving(true)
-    await save({
-      childFirstName: firstName,
-      childDOB: dob.toISOString().slice(0, 10),
-      childSex: sex,
-    })
-    setSaving(false)
-    // Navigate back to Settings list to signal save complete
-    navigation.goBack()
-  }
+    setSaving(true);
+    try {
+      const settingsToSave: Partial<UserSettings> = {
+        childFirstName: firstName,
+        childDOB: Timestamp.fromDate(dob), // Save as Firestore Timestamp
+        childSex: sex,
+      };
+      await save(settingsToSave);
+      setSaving(false);
+      // Navigate back to Settings list to signal save complete
+      navigation.goBack();
+    } catch (saveError: any) {
+      setSaving(false);
+      console.error('Error saving settings:', saveError);
+      // Display error to user (consider using a more user-friendly message)
+      // Alert.alert('Save Failed', saveError.message || 'Could not save settings.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -84,14 +103,16 @@ export default function ChildInfoScreen() {
       />
 
       <Text style={styles.label}>Date of Birth</Text>
-      <Text style={styles.dateText} onPress={() => setShowPicker(true)}>
-        {dob.toDateString()}
-      </Text>
+      <TouchableOpacity style={styles.dateTouchable} onPress={() => setShowPicker(true)}>
+        <Text style={styles.dateText}>
+          {dob.toDateString()}
+        </Text>
+      </TouchableOpacity>
       {showPicker && (
         <DateTimePicker
           value={dob}
           mode="date"
-          display="default"
+          display="default" // Consider 'spinner' for consistency with onboarding if desired
           onChange={onChangeDate}
           maximumDate={new Date()}
         />
@@ -115,7 +136,10 @@ export default function ChildInfoScreen() {
                   : styles.radioText
               }
             >
-              {option.charAt(0).toUpperCase() + option.slice(1)}
+              {/* Display 'None' instead of 'Other' */}
+              {option === 'none'
+                ? 'None'
+                : option.charAt(0).toUpperCase() + option.slice(1)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -126,11 +150,11 @@ export default function ChildInfoScreen() {
           title={saving ? 'Saving...' : 'Save'}
           onPress={handleSave}
           color={colors.accentPrimary}
-          disabled={saving}
+          disabled={saving || loading} // Disable if loading initial settings too
         />
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -149,37 +173,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textPrimary,
     marginTop: 12,
+    // Consider using theme typography
   },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 4,
-    padding: 8,
+    padding: 10, // Increased padding slightly
     marginTop: 4,
     backgroundColor: colors.card,
     color: colors.textPrimary,
+    fontSize: 16, // Ensure consistent font size
+  },
+  dateTouchable: { // Wrap date text in touchable for better hit area
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 4,
+    padding: 10,
+    marginTop: 4,
+    backgroundColor: colors.card,
   },
   dateText: {
     fontSize: 16,
     color: colors.textPrimary,
-    padding: 8,
-    backgroundColor: colors.card,
-    borderRadius: 4,
-    marginTop: 4,
   },
   radioGroup: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around', // Adjusted spacing
     marginTop: 8,
   },
   radioOption: {
     flex: 1,
-    padding: 12,
+    paddingVertical: 12,
     marginHorizontal: 4,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 4,
     backgroundColor: colors.card,
+    alignItems: 'center', // Center text
   },
   radioSelected: {
     borderColor: colors.accentPrimary,
@@ -200,5 +231,7 @@ const styles = StyleSheet.create({
   error: {
     color: colors.error,
     marginTop: 20,
+    textAlign: 'center',
   },
-})
+});
+

@@ -1,4 +1,5 @@
 // File: src/models/types.ts
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 // ─── Activity Types ───────────────────────────────────────────────────
 export type ActivityType =
@@ -98,7 +99,7 @@ export type Activity =
 // ─── User Management & Settings ──────────────────────────────────────
 
 /**
- * Represents another user invited to this journal (MVP: no roles). 
+ * Represents another user invited to this journal (MVP: no roles).
  */
 export interface InvitedUser {
   uid: string;
@@ -114,11 +115,12 @@ export interface UserSettings {
   name: string;
   phoneNumber: string;
   email?: string;
+  onboarded?: boolean; // Added based on SignUpScreen logic
 
   // ─── Child Information ───────────────────────────────────────────
   childFirstName: string;
-  childDOB: string;           // ISO date string (e.g. '2025-04-30')
-  childSex: 'boy' | 'girl' | 'other';
+  childDOB: Timestamp; // Changed from string to Firestore Timestamp
+  childSex: 'boy' | 'girl' | 'none'; // Standardized options
 
   // ─── Tracked Activities ──────────────────────────────────────────
   trackedActivities: {
@@ -126,23 +128,39 @@ export interface UserSettings {
     feeding: boolean;
     diaper: boolean;
     milestone: boolean;
+    // Missing from audit report but in spec: Growth, Health
+    growth?: boolean;
+    health?: boolean;
   };
 
   // ─── Caregiver Access ───────────────────────────────────────────—
-  invitedUsers: InvitedUser[];
+  // invitedUsers: InvitedUser[]; // Schema changed to subcollection
 
   // ─── Communication Preferences ─────────────────────────────────
   communication: {
     nudgesEnabled: boolean;
+    // Missing from audit report but in spec:
+    insightsEnabled?: boolean;
+    emailPreferences?: {
+      summary?: boolean;
+      insights?: boolean;
+    };
+    pushCategories?: {
+      timerReminders?: boolean;
+      routineSuggestions?: boolean;
+      ageBasedInsights?: boolean;
+    };
   };
 
   // ─── Display Preferences ────────────────────────────────────────
   display: {
-    theme: 'light' | 'dark' | 'system';
+    theme: 'light' | 'dark' | 'beige' | 'system'; // Added beige, system (default)
     feedingUnit: 'oz' | 'ml';
     growthUnit: 'lb/in' | 'kg/cm';
+    defaultView?: 'Timeline' | 'Schedule' | 'Card'; // Missing from audit report but in spec
   };
 
   // ─── Export & Backup ─────────────────────────────────────────────
-  exportRange: '7days' | 'all';
+  // exportRange: '7days' | 'all'; // This might be a function parameter, not a setting
 }
+
