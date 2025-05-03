@@ -1,5 +1,6 @@
 // File: src/models/types.ts
 
+// ─── Activity Types ───────────────────────────────────────────────────
 export type ActivityType =
   | 'sleep'
   | 'feeding'
@@ -13,10 +14,10 @@ export interface BaseActivity {
   dateKey?: string;
   type: ActivityType;
   title: string;
-  createdAt: string;
+  createdAt: string; // ISO timestamp string
 }
 
-// ─── Sleep ────────────────────────────────────────────────────────
+// ─── Sleep ───────────────────────────────────────────────────────────
 export interface SleepInterruption {
   time: string;
   duration: number; // in minutes
@@ -33,7 +34,7 @@ export interface SleepActivity extends BaseActivity {
   interruptions?: SleepInterruption[];
 }
 
-// ─── Feeding ──────────────────────────────────────────────────────
+// ─── Feeding ─────────────────────────────────────────────────────────
 export interface BreastFeedingActivity extends BaseActivity {
   type: 'feeding';
   mode: 'breast';
@@ -64,7 +65,7 @@ export type FeedingActivity =
   | BottleFeedingActivity
   | SolidsFeedingActivity;
 
-// ─── Diaper ───────────────────────────────────────────────────────
+// ─── Diaper ──────────────────────────────────────────────────────────
 export interface DiaperActivity extends BaseActivity {
   type: 'diaper';
   status?: 'Wet' | 'Dry' | 'Dirty';
@@ -73,20 +74,20 @@ export interface DiaperActivity extends BaseActivity {
   notes?: string;
 }
 
-// ─── Milestone ────────────────────────────────────────────────────
+// ─── Milestone ───────────────────────────────────────────────────────
 export interface MilestoneActivity extends BaseActivity {
   type: 'milestone';
   notes?: string;
   photos?: string[];
 }
 
-// ─── Health ───────────────────────────────────────────────────────
+// ─── Health ──────────────────────────────────────────────────────────
 export interface HealthActivity extends BaseActivity {
   type: 'health';
   details?: string;
 }
 
-// ─── Union ────────────────────────────────────────────────────────
+// ─── Union ───────────────────────────────────────────────────────────
 export type Activity =
   | SleepActivity
   | FeedingActivity
@@ -94,5 +95,54 @@ export type Activity =
   | MilestoneActivity
   | HealthActivity;
 
-// (Mock data and UI mappings have been moved to their own modules.)
+// ─── User Management & Settings ──────────────────────────────────────
 
+/**
+ * Represents another user invited to this journal (MVP: no roles). 
+ */
+export interface InvitedUser {
+  uid: string;
+  name: string;
+  phoneNumber: string;
+}
+
+/**
+ * Client-side representation of all configurable user settings (MVP).
+ */
+export interface UserSettings {
+  // ─── Profile & Account Info ───────────────────────────────────────
+  name: string;
+  phoneNumber: string;
+  email?: string;
+
+  // ─── Child Information ───────────────────────────────────────────
+  childFirstName: string;
+  childDOB: string;           // ISO date string (e.g. '2025-04-30')
+  childSex: 'boy' | 'girl' | 'other';
+
+  // ─── Tracked Activities ──────────────────────────────────────────
+  trackedActivities: {
+    sleep: boolean;
+    feeding: boolean;
+    diaper: boolean;
+    milestone: boolean;
+  };
+
+  // ─── Caregiver Access ───────────────────────────────────────────—
+  invitedUsers: InvitedUser[];
+
+  // ─── Communication Preferences ─────────────────────────────────
+  communication: {
+    nudgesEnabled: boolean;
+  };
+
+  // ─── Display Preferences ────────────────────────────────────────
+  display: {
+    theme: 'light' | 'dark' | 'system';
+    feedingUnit: 'oz' | 'ml';
+    growthUnit: 'lb/in' | 'kg/cm';
+  };
+
+  // ─── Export & Backup ─────────────────────────────────────────────
+  exportRange: '7days' | 'all';
+}

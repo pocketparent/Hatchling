@@ -16,12 +16,17 @@ import AppTabs from './src/navigation/AppTabs'
 import { LoginScreen } from './src/screens/Auth/LoginScreen'
 import { SignUpScreen } from './src/screens/Auth/SignUpScreen'
 import OnboardingNavigator from './src/navigation/OnboardingNavigator'
+import { ChatScreen } from './src/screens/ChatScreen' // adjust path as needed
+
 
 export type RootStackParamList = {
   Login: undefined
   SignUp: undefined
   Onboarding: undefined
   Main: undefined
+  Chat: {
+    childId: string
+  }
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
@@ -71,6 +76,7 @@ export default function App() {
           <Stack.Screen name="SignUp" component={SignUpScreen} />
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
           <Stack.Screen name="Main" component={AppTabs} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

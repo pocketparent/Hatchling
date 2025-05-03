@@ -9,6 +9,10 @@ import AppTabs             from './AppTabs';
 export type RootParamList = {
   Onboarding: undefined;
   Main:       undefined;
+  Chat: {
+    userId: string
+    childId: string
+  }
 };
 
 const RootStack = createNativeStackNavigator<RootParamList>();
