@@ -12,36 +12,55 @@ import {
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { Button } from '../../components/common/Button';
 import { spacing } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { colors } from '../../theme/colors';
 import { OnboardingParamList } from '../../navigation/OnboardingNavigator';
+import { useAuth } from '../../hooks/useAuth'; // Import useAuth
+import { updateSettings } from '../../services/settingsService'; // Import updateSettings
 
 type Props = NativeStackScreenProps<OnboardingParamList, 'ChildInfo'>;
 
+// Standardized sex options based on user confirmation
+const sexOptions: Array<'boy' | 'girl' | 'none'> = ['boy', 'girl', 'none'];
+
 export default function ChildInfoScreen({ navigation }: Props) {
+  const { user } = useAuth(); // Get user from auth context
   const [babyName, setBabyName] = useState('');
   const [sex, setSex] = useState<'boy' | 'girl' | 'none'>('none');
   const [dob, setDob] = useState<Date>(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (!user) {
+      Alert.alert('Error', 'User not authenticated.');
+      return;
+    }
     if (!babyName.trim()) {
       Alert.alert('Please enter your baby’s name.');
       return;
     }
-    if (sex === 'none') {
-      Alert.alert('Please select your baby’s sex.');
-      return;
-    }
+    // No need to check sex === 'none' as it's a valid option per spec
+
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await updateSettings(user.uid, {
+        childFirstName: babyName.trim(),
+        childSex: sex,
+        childDOB: Timestamp.fromDate(dob), // Convert Date to Firestore Timestamp
+        onboarded: false, // Keep onboarded false until final step
+      });
       setLoading(false);
-      navigation.push('Prefs');
-    }, 500);
+      navigation.push('Prefs'); // Navigate on successful save
+    } catch (error: any) {
+      setLoading(false);
+      console.error('Error saving child info:', error);
+      Alert.alert('Error', 'Could not save child information. Please try again.');
+    }
   };
 
   return (
@@ -63,19 +82,20 @@ export default function ChildInfoScreen({ navigation }: Props) {
             onChangeText={setBabyName}
             placeholder="e.g. Mari"
             style={styles.input}
+            placeholderTextColor={colors.textSecondary} // Added placeholder color
           />
 
           {/* Sex */}
           <Text style={styles.label}>Sex</Text>
           <View style={styles.sexContainer}>
-            {['boy', 'girl', 'none'].map((option) => (
+            {sexOptions.map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[
                   styles.sexOption,
                   sex === option && styles.sexOptionSelected,
                 ]}
-                onPress={() => setSex(option as any)}
+                onPress={() => setSex(option)}
               >
                 <Text
                   style={[
@@ -83,8 +103,9 @@ export default function ChildInfoScreen({ navigation }: Props) {
                     sex === option && styles.sexTextSelected,
                   ]}
                 >
+                  {/* Display 'None' instead of 'N/A' */}
                   {option === 'none'
-                    ? 'N/A'
+                    ? 'None'
                     : option.charAt(0).toUpperCase() + option.slice(1)}
                 </Text>
               </TouchableOpacity>
@@ -123,7 +144,8 @@ export default function ChildInfoScreen({ navigation }: Props) {
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
             }}
-            textColor={colors.textPrimary}
+            // Use theme colors for picker text if possible, otherwise default
+            // textColor={colors.textPrimary} // May not be supported by all pickers/platforms
           />
 
           {/* Next Button */}
@@ -169,6 +191,8 @@ const styles = StyleSheet.create({
     fontFamily: typography.fonts.regular,
     fontSize: typography.sizes.md,
     marginBottom: spacing.md,
+    color: colors.textPrimary, // Ensure input text color uses theme
+    backgroundColor: colors.card, // Ensure input background uses theme
   },
   dobText: {
     fontFamily: typography.fonts.regular,
@@ -188,6 +212,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     marginHorizontal: spacing.xs,
     alignItems: 'center',
+    backgroundColor: colors.card, // Ensure options use theme background
   },
   sexOptionSelected: {
     backgroundColor: colors.accentSecondary,
@@ -199,10 +224,11 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   sexTextSelected: {
-    color: colors.card,
+    color: colors.card, // Text color for selected option
     fontFamily: typography.fonts.medium,
   },
   buttonContainer: {
     marginTop: spacing.lg,
   },
 });
+
