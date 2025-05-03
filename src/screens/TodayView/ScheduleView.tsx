@@ -1,24 +1,78 @@
-import React from 'react';
-import { SectionList, StyleSheet, View, Text } from 'react-native';
+import React, { useState, useEffect } from 'react'; // Added useState, useEffect
+import { SectionList, StyleSheet, View, Text, ActivityIndicator } from 'react-native'; // Added ActivityIndicator
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
-import { ScheduleSection, mockSchedule } from '../../models/types';
+import { ScheduleSection } from '../../models/types'; // Correctly import ScheduleSection
+
+// Placeholder function for fetching schedule data - replace with actual implementation
+async function fetchScheduleData(): Promise<ScheduleSection[]> {
+  console.log('Fetching schedule data...');
+  // Simulate network request
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Return empty array for now, or replace with actual fetch logic
+  // Example: return await getScheduleFromAPI();
+  return []; // Return empty array as placeholder
+}
 
 export default function ScheduleView() {
-  let napCount = 0;
-  const sections: ScheduleSection[] = mockSchedule.map((sec) => {
-    if (sec.title.toLowerCase().includes('nap')) {
-      napCount += 1;
-      return { ...sec, title: `Nap #${napCount}` };
-    }
-    return sec;
-  });
+  const [sections, setSections] = useState<ScheduleSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchScheduleData()
+      .then(data => {
+        // Process data if needed (e.g., adding Nap counts)
+        let napCount = 0;
+        const processedSections = data.map((sec) => {
+          if (sec.title.toLowerCase().includes('nap')) {
+            napCount += 1;
+            return { ...sec, title: `Nap #${napCount}` };
+          }
+          return sec;
+        });
+        setSections(processedSections);
+      })
+      .catch(err => {
+        console.error('Failed to fetch schedule:', err);
+        setError('Could not load schedule.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []); // Fetch data on component mount
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (sections.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>No schedule available for today.</Text>
+      </View>
+    );
+  }
 
   return (
     <SectionList
       sections={sections}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => item.id + index} // Use index for potentially non-unique IDs in mock/real data
       contentContainerStyle={styles.container}
       renderSectionHeader={({ section }) => {
         const times =
@@ -52,8 +106,14 @@ export default function ScheduleView() {
 const styles = StyleSheet.create({
   container: {
     padding: spacing.md,
+    flexGrow: 1, // Ensure container grows if content is short
   },
-
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
   headerContainer: {
     backgroundColor: colors.accentPrimary,
     paddingVertical: spacing.sm,
@@ -75,13 +135,12 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: 'white',
   },
-
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background, // Use theme color
     borderRadius: 8,
   },
   bullet: {
@@ -95,15 +154,24 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: typography.fonts.regular,
     fontSize: typography.sizes.md,
-    color: colors.textPrimary,
+    color: colors.textPrimary, // Use theme color
   },
   itemTime: {
     fontFamily: typography.fonts.regular,
     fontSize: typography.sizes.sm,
-    color: colors.textSecondary,
+    color: colors.textSecondary, // Use theme color
   },
-
   separator: {
     height: spacing.xs,
   },
+  errorText: {
+    color: colors.error,
+    fontFamily: typography.fonts.regular,
+  },
+  emptyText: {
+    color: colors.textSecondary,
+    fontFamily: typography.fonts.regular,
+    fontSize: typography.sizes.md,
+  },
 });
+
