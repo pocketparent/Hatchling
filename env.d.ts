@@ -8,4 +8,7 @@ declare module '@env' {
   export const EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
   export const EXPO_PUBLIC_FIREBASE_APP_ID: string;
 
+  // Add the missing declaration for OPENAI_API_KEY
+  export const OPENAI_API_KEY: string;
+
 }
