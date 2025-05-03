@@ -128,18 +128,13 @@ export interface UserSettings {
     feeding: boolean;
     diaper: boolean;
     milestone: boolean;
-    // Missing from audit report but in spec: Growth, Health
     growth?: boolean;
     health?: boolean;
   };
 
-  // ─── Caregiver Access ───────────────────────────────────────────—
-  // invitedUsers: InvitedUser[]; // Schema changed to subcollection
-
   // ─── Communication Preferences ─────────────────────────────────
   communication: {
     nudgesEnabled: boolean;
-    // Missing from audit report but in spec:
     insightsEnabled?: boolean;
     emailPreferences?: {
       summary?: boolean;
@@ -159,8 +154,20 @@ export interface UserSettings {
     growthUnit: 'lb/in' | 'kg/cm';
     defaultView?: 'Timeline' | 'Schedule' | 'Card'; // Missing from audit report but in spec
   };
-
-  // ─── Export & Backup ─────────────────────────────────────────────
-  // exportRange: '7days' | 'all'; // This might be a function parameter, not a setting
 }
+
+// ─── Schedule View Types ─────────────────────────────────────────────
+
+export interface ScheduleItem {
+  id: string;
+  label: string;
+  time: string; // e.g., "9:00 AM"
+}
+
+export interface ScheduleSection {
+  title: string; // e.g., "Morning Routine", "Nap #1"
+  data: ScheduleItem[];
+}
+
+// Removed mockSchedule definition from here
 
