@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "677637931893",
+    "project_id": "warm-classifier-456614-h3",
+    "storage_bucket": "warm-classifier-456614-h3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677637931893:android:0d13fc2c3bac38fca1c93c",
+        "android_client_info": {
+          "package_name": "com.hatchling.hatchling"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpK7rcsxZL8611lrTxUER_K7hcNjjOMJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
