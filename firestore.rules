@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // By default, deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Example: Allow users to read and write their own data
+    // Assumes you have a 'users' collection where document IDs are user UIDs
+    // and each user has a 'data' subcollection.
+    // match /users/{userId}/{document=**} {
+    //   allow read, write: if request.auth != null && request.auth.uid == userId;
+    // }
+
+    // You will need to define rules specific to your application's data model.
+    // For example, if you have a 'routines' collection:
+    // match /routines/{routineId} {
+    //   // Allow authenticated users to create routines
+    //   allow create: if request.auth != null;
+    //   // Allow the user who created the routine to read, update, or delete it
+    //   // This assumes you store a 'userId' field on each routine document
+    //   allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    // }
+  }
+}
