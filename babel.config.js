@@ -2,6 +2,7 @@
 module.exports = {
   presets: ['module:metro-react-native-babel-preset'],
   plugins: [
+    '@babel/plugin-transform-optional-chaining',
     [
       'module:react-native-dotenv',
       {
