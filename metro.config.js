@@ -3,7 +3,7 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// Add this to resolve the Babel plugin issue by excluding the problematic file
+// Blacklist the problematic file
 config.resolver = {
   ...config.resolver,
   blacklistRE: [

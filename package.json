@@ -38,7 +38,7 @@
     "zod": "^3.24.3",
     "react-native-dotenv": "^3.4.11"
   },
-  "devDependencies": {
+   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@babel/plugin-proposal-private-methods": "^7.18.6",
